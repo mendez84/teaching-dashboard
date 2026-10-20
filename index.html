@@ -1,0 +1,4354 @@
+<title>Mr. Mendez — Teaching Dashboard</title>
+
+<style>
+:root{
+  --ground:#F7F6F3; --surface:#FFFFFF; --sunk:#EFEDE8;
+  --ink:#16202C; --body:#33404F; --muted:#6B7889; --line:#DEDBD4;
+  --im1:#2F6F8F; --im1-soft:#E4EEF3;
+  --fa:#3F6B52; --fa-soft:#E3EDE7;
+  --now:#C8791A; --now-soft:#FBEEDC;
+  --alert:#A33B2A; --alert-soft:#F8E5E1;
+  --shadow:0 1px 2px rgba(22,32,44,.06),0 4px 16px rgba(22,32,44,.05);
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --r:12px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#111820; --surface:#1A2430; --sunk:#151E28;
+    --ink:#EEF2F6; --body:#C2CCD8; --muted:#8494A6; --line:#2B3846;
+    --im1:#6FB4D4; --im1-soft:#1C3340;
+    --fa:#7FBE9B; --fa-soft:#1B3227;
+    --now:#E9A44E; --now-soft:#3A2A14;
+    --alert:#E8836F; --alert-soft:#3A1F1A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111820; --surface:#1A2430; --sunk:#151E28;
+  --ink:#EEF2F6; --body:#C2CCD8; --muted:#8494A6; --line:#2B3846;
+  --im1:#6FB4D4; --im1-soft:#1C3340;
+  --fa:#7FBE9B; --fa-soft:#1B3227;
+  --now:#E9A44E; --now-soft:#3A2A14;
+  --alert:#E8836F; --alert-soft:#3A1F1A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25);
+}
+:root[data-theme="light"]{
+  --ground:#F7F6F3; --surface:#FFFFFF; --sunk:#EFEDE8;
+  --ink:#16202C; --body:#33404F; --muted:#6B7889; --line:#DEDBD4;
+  --im1:#2F6F8F; --im1-soft:#E4EEF3;
+  --fa:#3F6B52; --fa-soft:#E3EDE7;
+  --now:#C8791A; --now-soft:#FBEEDC;
+  --alert:#A33B2A; --alert-soft:#F8E5E1;
+  --shadow:0 1px 2px rgba(22,32,44,.06),0 4px 16px rgba(22,32,44,.05);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--body);
+  font-family:var(--sans);font-size:16px;line-height:1.55;
+  -webkit-text-size-adjust:100%;padding-bottom:80px}
+h1,h2,h3{color:var(--ink);text-wrap:balance;margin:0}
+.wrap{max-width:780px;margin:0 auto;padding:0 16px}
+
+/* ---------- header ---------- */
+.top{background:var(--surface);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:40}
+.top .wrap{display:flex;align-items:center;gap:12px;
+  padding-top:12px;padding-bottom:12px}
+.brand{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.brand span{display:block;font:500 11px/1.3 var(--mono);color:var(--muted);
+  letter-spacing:.09em;text-transform:uppercase}
+.spring{flex:1}
+.iconbtn{background:var(--sunk);border:1px solid var(--line);color:var(--body);
+  width:38px;height:38px;border-radius:9px;font-size:15px;cursor:pointer;
+  display:grid;place-items:center}
+.iconbtn:hover{border-color:var(--muted)}
+.iconbtn:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+
+/* ---------- now bar ---------- */
+.nowbar{background:var(--now-soft);border-bottom:1px solid var(--line)}
+.nowbar .wrap{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  padding-top:9px;padding-bottom:9px}
+.nowbar .clock{font:700 14px/1 var(--mono);color:var(--now);
+  font-variant-numeric:tabular-nums}
+.nowbar .msg{font-size:13.5px;color:var(--ink);font-weight:600}
+.nowbar .sub{font-size:13px;color:var(--muted)}
+
+/* ---------- tabs ---------- */
+.tabs{background:var(--surface);border-bottom:1px solid var(--line);
+  position:sticky;top:63px;z-index:35}
+.tabs .wrap{display:flex;gap:2px;overflow-x:auto;padding:0 16px;
+  scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{flex:none;background:none;border:none;border-bottom:2.5px solid transparent;
+  color:var(--muted);font:600 13.5px/1 var(--sans);padding:13px 12px;
+  cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--now)}
+.tab:focus-visible{outline:2px solid var(--now);outline-offset:-3px}
+
+/* ---------- day header ---------- */
+.dayhead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;
+  padding:22px 0 4px}
+.dayhead h2{font-size:22px;letter-spacing:-.02em;line-height:1.2}
+.dayhead .d{font:500 12.5px/1.4 var(--mono);color:var(--muted);
+  letter-spacing:.05em;text-transform:uppercase}
+.navbtns{display:flex;gap:6px;margin-left:auto}
+.navbtns button{background:var(--surface);border:1px solid var(--line);
+  color:var(--body);border-radius:8px;padding:6px 11px;font-size:13px;
+  cursor:pointer;font-family:var(--sans)}
+.navbtns button:hover{border-color:var(--muted)}
+.navbtns button:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+
+/* ---------- banners ---------- */
+.banner{border-radius:var(--r);padding:12px 14px;margin:14px 0;
+  font-size:14px;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.banner b{color:var(--ink)}
+.banner.warn{background:var(--now-soft);border:1px solid var(--now)}
+.banner.crit{background:var(--alert-soft);border:1px solid var(--alert)}
+.banner .ic{font:700 12px/1.5 var(--mono);flex:none}
+
+/* ---------- period cards ---------- */
+.cards{display:flex;flex-direction:column;gap:12px;margin:16px 0 30px}
+.card{background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.card.im1{border-left:4px solid var(--im1)}
+.card.fa{border-left:4px solid var(--fa)}
+.card.iscur{border-color:var(--now);box-shadow:0 0 0 2px var(--now-soft),var(--shadow)}
+.card.free{border-left:4px solid var(--line);opacity:.75}
+
+.chead{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  cursor:pointer;width:100%;background:none;border:none;text-align:left;
+  font-family:var(--sans)}
+.chead:focus-visible{outline:2px solid var(--now);outline-offset:-3px}
+.pnum{font:700 19px/1 var(--mono);color:var(--muted);
+  font-variant-numeric:tabular-nums;flex:none;width:22px}
+.card.im1 .pnum{color:var(--im1)} .card.fa .pnum{color:var(--fa)}
+.cmid{flex:1;min-width:0}
+.ctime{font:600 12px/1.4 var(--mono);color:var(--muted);
+  font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.ctitle{font-size:15.5px;font-weight:650;color:var(--ink);line-height:1.35;
+  margin-top:2px}
+.cright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
+.chev{color:var(--muted);font-size:12px;transition:transform .18s}
+.card.open .chev{transform:rotate(180deg)}
+
+.pill{display:inline-block;font:700 10px/1 var(--mono);letter-spacing:.09em;
+  text-transform:uppercase;padding:5px 7px;border-radius:5px;white-space:nowrap}
+.pill.im1{background:var(--im1-soft);color:var(--im1)}
+.pill.fa{background:var(--fa-soft);color:var(--fa)}
+.pill.now{background:var(--now);color:#fff}
+.pill.must{background:var(--now-soft);color:var(--now)}
+.pill.gh{background:var(--sunk);color:var(--muted)}
+
+/* ---------- taught status ---------- */
+.srow{display:flex;gap:6px;align-items:center;padding:0 16px 13px;flex-wrap:wrap}
+.slab{font:700 9.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin-right:2px}
+.sbtn{background:var(--sunk);border:1px solid var(--line);color:var(--muted);
+  border-radius:20px;padding:6px 12px;font:650 12px/1 var(--sans);cursor:pointer}
+.sbtn:hover{border-color:var(--muted);color:var(--ink)}
+.sbtn:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+.sbtn[aria-pressed="true"].on{background:var(--fa);border-color:var(--fa);color:#fff}
+.sbtn[aria-pressed="true"].long{background:var(--now);border-color:var(--now);color:#fff}
+.sbtn[aria-pressed="true"].no{background:var(--alert);border-color:var(--alert);color:#fff}
+
+.drift{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--now);
+  border-radius:var(--r);padding:13px 15px;margin:14px 0;box-shadow:var(--shadow)}
+.drift h3{font-size:14px;margin-bottom:2px}
+.drift .dsub{font-size:13px;color:var(--muted);line-height:1.5}
+.drift ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.drift li{display:flex;gap:9px;align-items:baseline;font-size:13.5px}
+.drift .dp{font:700 11px/1.5 var(--mono);color:var(--muted);flex:none;width:52px}
+.drift .dv{font-weight:650;color:var(--now)}
+.drift .dv.ok{color:var(--fa)}
+
+.cbody{display:none;padding:0 16px 16px;border-top:1px solid var(--line)}
+.card.open .cbody{display:block}
+.goal{font-size:14.5px;color:var(--body);margin:14px 0;padding-left:12px;
+  border-left:2px solid var(--line);font-style:italic}
+
+.seclab{font:700 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin:18px 0 9px}
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.flow li{display:flex;gap:11px;font-size:14px;line-height:1.5}
+.flow .mm{font:700 11.5px/1.6 var(--mono);color:var(--ink);background:var(--sunk);
+  border-radius:5px;padding:1px 6px;height:fit-content;flex:none;min-width:38px;
+  text-align:center;font-variant-numeric:tabular-nums}
+.flow .ft{color:var(--ink);font-weight:650}
+.flow .fd{color:var(--body);display:block;margin-top:1px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--sunk);border-radius:6px;padding:5px 9px;font-size:12.5px;
+  color:var(--body);overflow-wrap:anywhere;min-width:0;max-width:100%}
+a.lnk{color:var(--im1);text-decoration:underline;text-underline-offset:2px;font-weight:600;overflow-wrap:anywhere}
+a.lnk:hover{text-decoration-thickness:2px}
+.note{background:var(--sunk);border-radius:9px;padding:11px 13px;font-size:13.5px;
+  line-height:1.5;margin-top:8px}
+.note.hot{background:var(--alert-soft);color:var(--ink)}
+.acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px;
+  padding-top:14px;border-top:1px solid var(--line)}
+.act{background:var(--sunk);border:1px solid var(--line);border-radius:8px;
+  padding:8px 12px;font:600 12.5px/1 var(--sans);color:var(--body);cursor:pointer}
+.act:hover{border-color:var(--muted);color:var(--ink)}
+.act:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+
+/* ---------- week ---------- */
+.wk{display:flex;flex-direction:column;gap:10px;margin:16px 0 30px}
+.wkday{background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r);padding:13px 15px;box-shadow:var(--shadow)}
+.wkday.today{border-color:var(--now);box-shadow:0 0 0 2px var(--now-soft),var(--shadow)}
+.wkday h3{font-size:14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.wkday .dt{font:500 11.5px/1 var(--mono);color:var(--muted);letter-spacing:.05em;
+  text-transform:uppercase}
+.wkrow{display:flex;gap:10px;font-size:13.5px;padding:7px 0;
+  border-top:1px solid var(--line);margin-top:8px;line-height:1.45}
+.wkrow:first-of-type{margin-top:10px}
+.wkrow .tag{font:700 10px/1.5 var(--mono);letter-spacing:.06em;flex:none;width:34px}
+.wkrow.im1 .tag{color:var(--im1)} .wkrow.fa .tag{color:var(--fa)}
+
+/* ---------- semester ---------- */
+.togg{display:flex;gap:6px;margin:16px 0 12px}
+.togg button{flex:1;background:var(--surface);border:1px solid var(--line);
+  color:var(--muted);border-radius:9px;padding:10px;font:650 13.5px/1 var(--sans);
+  cursor:pointer}
+.togg button[aria-pressed="true"]{background:var(--ink);color:var(--ground);
+  border-color:var(--ink)}
+.togg button:focus-visible{outline:2px solid var(--now);outline-offset:2px}
+.pace{display:flex;flex-direction:column;gap:7px;margin-bottom:30px}
+.pw{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:11px 14px;display:flex;gap:13px;align-items:flex-start}
+.pw.cur{border-color:var(--now);background:var(--now-soft)}
+.pw .w{font:700 11px/1.5 var(--mono);color:var(--muted);flex:none;width:46px;
+  letter-spacing:.04em}
+.pw .u{font-size:13.5px;color:var(--ink);line-height:1.45}
+.pw .dd{font:500 11px/1.5 var(--mono);color:var(--muted);display:block}
+.pw .nt{font-size:12.5px;color:var(--now);font-weight:600;display:block;margin-top:3px}
+
+/* ---------- prep ---------- */
+.prep{display:flex;flex-direction:column;gap:8px;margin:16px 0 30px}
+.pitem{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:12px 14px;display:flex;gap:11px;align-items:flex-start;cursor:pointer}
+.pitem.crit{border-left:4px solid var(--alert)}
+.pitem.done{opacity:.5}
+.pitem.done .ptext{text-decoration:line-through}
+.box{width:19px;height:19px;border:2px solid var(--muted);border-radius:5px;
+  flex:none;margin-top:1px;display:grid;place-items:center;font-size:12px;
+  color:transparent}
+.pitem.done .box{background:var(--fa);border-color:var(--fa);color:#fff}
+.ptext{font-size:14px;color:var(--ink);line-height:1.45}
+.pfor{font:500 11px/1.5 var(--mono);color:var(--muted);display:block;
+  letter-spacing:.04em;text-transform:uppercase}
+
+.qs{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px;margin-bottom:30px}
+.qs ul{margin:10px 0 0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.qs li{margin-bottom:6px}
+
+.foot{font-size:12.5px;color:var(--muted);text-align:center;padding:10px 0 24px;
+  line-height:1.6}
+.hide{display:none!important}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);
+  background:var(--ink);color:var(--ground);padding:11px 18px;border-radius:9px;
+  font-size:13.5px;font-weight:600;z-index:100;opacity:0;
+  transition:transform .25s,opacity .25s;pointer-events:none;max-width:90vw}
+#toast.show{transform:translate(-50%,0);opacity:1}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- print ---------- */
+@media print{
+  @page{margin:1.4cm}
+  body{background:#fff;color:#000;padding:0;font-size:11.5pt}
+  .top,.tabs,.nowbar,.navbtns,.acts,.togg,#toast,.iconbtn{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .card{break-inside:avoid;box-shadow:none;border:1px solid #bbb;
+    border-left-width:3px;margin-bottom:10pt}
+  .cbody{display:block!important}
+  .chev{display:none}
+  .wkday,.pw,.pitem,.qs{break-inside:avoid;box-shadow:none;border:1px solid #bbb}
+  .note,.chip,.flow .mm{background:#f2f2f2}
+  a{text-decoration:none;color:#000}
+  a.lnk{font-weight:400}
+  .printonly{display:block!important}
+  .printhide{display:none!important}
+}
+.printonly{display:none}
+</style>
+
+<div class="top"><div class="wrap">
+  <div class="brand">Mr. Mendez<span id="brandsub">CCHS · 2026-27</span></div>
+  <div class="spring"></div>
+  <button class="iconbtn" id="themebtn" title="Switch light/dark" aria-label="Switch light or dark theme">◐</button>
+</div></div>
+
+<div class="nowbar"><div class="wrap">
+  <span class="clock" id="clock">--:--</span>
+  <span class="msg" id="nowmsg">Loading…</span>
+  <span class="sub" id="nowsub"></span>
+</div></div>
+
+<div class="tabs"><div class="wrap" role="tablist">
+  <button class="tab" role="tab" data-v="today" aria-selected="true">Today</button>
+  <button class="tab" role="tab" data-v="week" aria-selected="false">Week</button>
+  <button class="tab" role="tab" data-v="sem" aria-selected="false">Semester</button>
+  <button class="tab" role="tab" data-v="prep" aria-selected="false">Prep</button>
+  <button class="tab" role="tab" data-v="notes" aria-selected="false">Notes</button>
+</div></div>
+
+<div class="wrap">
+  <div id="v-today"></div>
+  <div id="v-week" class="hide"></div>
+  <div id="v-sem" class="hide"></div>
+  <div id="v-prep" class="hide"></div>
+  <div id="v-notes" class="hide"></div>
+  <p class="foot">Built from the PSUSD scope &amp; sequence, the CCHS bell schedule, and the district calendar.<br>
+  Lesson data lives in <code>lessons.json</code>. Never put student names in here.<br>
+  <span id="builtline"></span></p>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = {
+ "bells": {
+  "regular": [
+   {
+    "p": 1,
+    "start": "08:45",
+    "end": "09:44",
+    "min": 59
+   },
+   {
+    "p": 2,
+    "start": "09:50",
+    "end": "10:49",
+    "min": 59
+   },
+   {
+    "p": 3,
+    "start": "10:55",
+    "end": "11:56",
+    "min": 61
+   },
+   {
+    "p": "lunch",
+    "start": "11:56",
+    "end": "12:32",
+    "min": 36
+   },
+   {
+    "p": 4,
+    "start": "12:38",
+    "end": "13:37",
+    "min": 59
+   },
+   {
+    "p": 5,
+    "start": "13:43",
+    "end": "14:42",
+    "min": 59
+   },
+   {
+    "p": 6,
+    "start": "14:48",
+    "end": "15:47",
+    "min": 59
+   }
+  ],
+  "lateStart": [
+   {
+    "p": 1,
+    "start": "10:20",
+    "end": "11:03",
+    "min": 43
+   },
+   {
+    "p": 2,
+    "start": "11:09",
+    "end": "11:52",
+    "min": 43
+   },
+   {
+    "p": 3,
+    "start": "11:58",
+    "end": "12:44",
+    "min": 46
+   },
+   {
+    "p": "lunch",
+    "start": "12:44",
+    "end": "13:20",
+    "min": 36
+   },
+   {
+    "p": 4,
+    "start": "13:26",
+    "end": "14:09",
+    "min": 43
+   },
+   {
+    "p": 5,
+    "start": "14:15",
+    "end": "14:58",
+    "min": 43
+   },
+   {
+    "p": 6,
+    "start": "15:04",
+    "end": "15:47",
+    "min": 43
+   }
+  ],
+  "drillRally": [
+   {
+    "p": 1,
+    "start": "08:45",
+    "end": "09:07",
+    "min": 22
+   },
+   {
+    "p": 2,
+    "start": "09:13",
+    "end": "09:35",
+    "min": 22
+   },
+   {
+    "p": 3,
+    "start": "10:41",
+    "end": "11:03",
+    "min": 22
+   },
+   {
+    "p": "lunch",
+    "start": "11:03",
+    "end": "11:33",
+    "min": 30
+   },
+   {
+    "p": 4,
+    "start": "11:39",
+    "end": "12:01",
+    "min": 22
+   },
+   {
+    "p": 5,
+    "start": "12:07",
+    "end": "12:29",
+    "min": 22
+   },
+   {
+    "p": 6,
+    "start": "12:35",
+    "end": "12:57",
+    "min": 22
+   }
+  ]
+ },
+ "assign": {
+  "1": "IM1",
+  "2": "FA",
+  "3": "IM1",
+  "4": "FA",
+  "5": "PREP",
+  "6": "SUPPORT"
+ },
+ "days": [
+  {
+   "date": "2026-08-07",
+   "type": "regular",
+   "label": "Day 3",
+   "lessons": {
+    "1": "f7-im1",
+    "2": "f7-fa",
+    "3": "f7-im1-p3",
+    "4": "f7-fa-p4"
+   }
+  },
+  {
+   "date": "2026-08-10",
+   "type": "regular",
+   "lessons": {
+    "1": "w2-mon-im1",
+    "2": "w2-mon-fa",
+    "3": "w2-mon-im1",
+    "4": "w2-mon-fa"
+   }
+  },
+  {
+   "date": "2026-08-11",
+   "type": "regular",
+   "lessons": {
+    "1": "w2-tue-im1",
+    "2": "w2-tue-fa",
+    "3": "w2-tue-im1",
+    "4": "w2-tue-fa"
+   }
+  },
+  {
+   "date": "2026-08-12",
+   "type": "lateStart",
+   "lessons": {
+    "1": "w2-wed-im1",
+    "2": "w2-wed-fa",
+    "3": "w2-wed-im1",
+    "4": "w2-wed-fa"
+   }
+  },
+  {
+   "date": "2026-08-13",
+   "type": "regular",
+   "lessons": {
+    "1": "w2-thu-im1",
+    "2": "w2-thu-fa",
+    "3": "w2-thu-im1",
+    "4": "w2-thu-fa"
+   }
+  },
+  {
+   "date": "2026-08-14",
+   "type": "regular",
+   "lessons": {
+    "1": "w2-fri-im1",
+    "2": "w2-fri-p2-fa",
+    "3": "w2-fri-im1",
+    "4": "w2-fri-p4-fa"
+   }
+  },
+  {
+   "date": "2026-08-17",
+   "type": "regular",
+   "lessons": {
+    "1": "w3-mon-im1",
+    "3": "w3-mon-im1"
+   }
+  },
+  {
+   "date": "2026-09-16",
+   "type": "lateStart",
+   "lessons": {
+    "2": "w7-wed-fa",
+    "4": "w7-wed-fa"
+   }
+  },
+  {
+   "date": "2026-09-17",
+   "type": "regular",
+   "lessons": {
+    "2": "w7-thu-fa",
+    "4": "w7-thu-fa"
+   }
+  },
+  {
+   "date": "2026-09-18",
+   "type": "regular",
+   "lessons": {
+    "2": "w7-fri-fa",
+    "4": "w7-fri-fa"
+   }
+  },
+  {
+   "date": "2026-09-25",
+   "type": "regular",
+   "lessons": {
+    "2": "w8-fri-fa",
+    "4": "w8-fri-fa"
+   }
+  },
+  {
+   "date": "2026-09-28",
+   "type": "regular",
+   "lessons": {
+    "1": "w9-mon-im1",
+    "2": "w9-mon-fa",
+    "3": "w9-mon-im1",
+    "4": "w9-mon-fa"
+   }
+  },
+  {
+   "date": "2026-09-29",
+   "type": "regular",
+   "lessons": {
+    "1": "w9-tue-im1",
+    "3": "w9-tue-im1"
+   },
+   "label": "District IAB"
+  },
+  {
+   "date": "2026-09-30",
+   "type": "lateStart",
+   "lessons": {
+    "1": "w9-wed-im1",
+    "3": "w9-wed-im1"
+   }
+  },
+  {
+   "date": "2026-10-01",
+   "type": "regular",
+   "lessons": {
+    "1": "w9-wed-im1",
+    "3": "w9-thu-im1"
+   }
+  },
+  {
+   "date": "2026-10-02",
+   "type": "regular",
+   "lessons": {
+    "1": "w9-fri-im1",
+    "3": "w9-fri-im1"
+   }
+  },
+  {
+   "date": "2026-10-05",
+   "type": "regular",
+   "lessons": {
+    "1": "w10-mon-im1",
+    "2": "w10-mon-fa",
+    "3": "w10-mon-im1",
+    "4": "w10-mon-fa"
+   }
+  },
+  {
+   "date": "2026-10-06",
+   "type": "regular",
+   "lessons": {
+    "1": "w10-tue-im1",
+    "2": "w10-tue-fa",
+    "3": "w10-tue-im1",
+    "4": "w10-tue-fa"
+   }
+  },
+  {
+   "date": "2026-10-07",
+   "type": "lateStart",
+   "lessons": {
+    "1": "w10-wed-im1",
+    "2": "w10-wed-fa",
+    "3": "w10-wed-im1",
+    "4": "w10-wed-fa"
+   }
+  },
+  {
+   "date": "2026-10-08",
+   "type": "regular",
+   "lessons": {
+    "1": "w10-thu-im1",
+    "2": "w10-thu-fa",
+    "3": "w10-thu-im1",
+    "4": "w10-thu-fa"
+   }
+  },
+  {
+   "date": "2026-10-09",
+   "type": "regular",
+   "lessons": {
+    "1": "w10-fri-im1",
+    "2": "w10-fri-fa",
+    "3": "w10-fri-im1",
+    "4": "w10-fri-fa"
+   }
+  },
+  {
+   "date": "2026-10-13",
+   "type": "regular",
+   "lessons": {
+    "2": "w11-tue-fa",
+    "4": "w11-tue-fa",
+    "1": "w11-tue-im1",
+    "3": "w11-tue-im1"
+   }
+  },
+  {
+   "date": "2026-10-14",
+   "type": "lateStart",
+   "lessons": {
+    "1": "w11-wed-im1",
+    "3": "w11-wed-im1",
+    "2": "w11-wed-fa",
+    "4": "w11-wed-fa"
+   }
+  },
+  {
+   "date": "2026-10-15",
+   "type": "drillRally",
+   "lessons": {
+    "1": "w11-thu-im1",
+    "3": "w11-thu-im1",
+    "2": "w11-thu-fa",
+    "4": "w11-thu-fa"
+   },
+   "label": "Drill + Rally: 22-minute periods"
+  },
+  {
+   "date": "2026-10-16",
+   "type": "regular",
+   "lessons": {
+    "1": "w11-fri-im1",
+    "3": "w11-fri-im1",
+    "2": "w11-fri-fa",
+    "4": "w11-fri-fa"
+   }
+  },
+  {
+   "date": "2026-10-19",
+   "type": "regular",
+   "lessons": {
+    "1": "w12-mon-im1",
+    "3": "w12-mon-im1",
+    "2": "w12-mon-fa",
+    "4": "w12-mon-fa"
+   }
+  },
+  {
+   "date": "2026-10-20",
+   "type": "regular",
+   "lessons": {
+    "1": "w12-tue-im1",
+    "3": "w12-tue-im1",
+    "2": "w12-tue-fa",
+    "4": "w12-tue-fa"
+   }
+  },
+  {
+   "date": "2026-10-21",
+   "type": "lateStart",
+   "lessons": {
+    "1": "w12-wed-im1",
+    "3": "w12-wed-im1",
+    "2": "w12-wed-fa",
+    "4": "w12-wed-fa"
+   }
+  },
+  {
+   "date": "2026-10-22",
+   "type": "regular",
+   "lessons": {
+    "1": "w12-thu-im1",
+    "3": "w12-thu-im1",
+    "2": "w12-thu-fa",
+    "4": "w12-thu-fa"
+   },
+   "label": "College Kick Off: 28-minute periods"
+  },
+  {
+   "date": "2026-10-23",
+   "type": "regular",
+   "lessons": {
+    "2": "w12-fri-fa",
+    "4": "w12-fri-fa",
+    "1": "w12-fri-im1",
+    "3": "w12-fri-im1"
+   }
+  }
+ ],
+ "lessons": {
+  "f7-im1": {
+   "course": "IM1",
+   "title": "Course Systems + Which One Doesn't Belong",
+   "unit": "Intro Weeks",
+   "goal": "Students can navigate Google Classroom on their own, and practice explaining a reason instead of hunting for one right answer.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Entry routine",
+     "d": "Do Now on board: \"Write one thing you remember about how this class works.\" Attendance while they write."
+    },
+    {
+     "m": 5,
+     "t": "Answer exit tickets",
+     "d": "Read out 3-4 questions from yesterday's exit tickets and answer them. This is why they'll write honestly all year."
+    },
+    {
+     "m": 8,
+     "t": "Phone policy, round 2",
+     "d": "Restate it, take questions. Don't relitigate — you already have buy-in."
+    },
+    {
+     "m": 13,
+     "t": "IM1 intro slides (Day 2 version)",
+     "d": "Use the interactive inserts: thumbs-up poll, turn and talk, predict the grading percentages before revealing."
+    },
+    {
+     "m": 15,
+     "t": "Google Classroom scavenger hunt",
+     "d": "Circulate. Write down who cannot log in — that's Monday's fix, not today's."
+    },
+    {
+     "m": 11,
+     "t": "Which One Doesn't Belong",
+     "d": "Board: 9, 16, 25, 43. Silent think 60s -> partner 90s -> take reasons for all four. Land it: every one was right, the reason is what mattered."
+    },
+    {
+     "m": 2,
+     "t": "Exit ticket",
+     "d": "\"One thing I'm still confused about\" + \"one thing I'm looking forward to.\""
+    }
+   ],
+   "materials": [
+    "Whiteboard + markers",
+    "Exit slips",
+    "Student devices",
+    "Projector"
+   ],
+   "answers": "WODB reasons (do NOT show students): 9 = only single digit. 16 = only even. 25 = only multiple of 5. 43 = only one that isn't a perfect square.",
+   "watch": "Who can't log in. Who didn't speak once in 59 minutes. Note both — don't fix either today."
+  },
+  "f7-im1-p3": {
+   "course": "IM1",
+   "title": "Course Systems + Which One Doesn't Belong",
+   "unit": "Intro Weeks",
+   "goal": "Same as Period 1, with 2 extra minutes. This period was your calmest — give it the extra thinking time.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Entry routine",
+     "d": "Do Now + attendance."
+    },
+    {
+     "m": 5,
+     "t": "Answer exit tickets",
+     "d": "3-4 questions from yesterday."
+    },
+    {
+     "m": 8,
+     "t": "Phone policy, round 2",
+     "d": "Restate, take questions."
+    },
+    {
+     "m": 15,
+     "t": "IM1 intro slides (Day 2 version)",
+     "d": "With the interactive inserts."
+    },
+    {
+     "m": 15,
+     "t": "Google Classroom scavenger hunt",
+     "d": "Circulate. Log who can't get in."
+    },
+    {
+     "m": 11,
+     "t": "Which One Doesn't Belong",
+     "d": "Board: 9, 16, 25, 43."
+    },
+    {
+     "m": 2,
+     "t": "Second WODB round",
+     "d": "Backup set: 3/4, 0.75, 75%, 7/10. Run it if the first lands fast."
+    }
+   ],
+   "materials": [
+    "Whiteboard + markers",
+    "Exit slips",
+    "Student devices",
+    "Projector"
+   ],
+   "answers": "Set A: 9 single digit / 16 only even / 25 only multiple of 5 / 43 not a perfect square. Set B: 7/10 is the only one not equal to the others; 0.75 only decimal; 75% only percent; 3/4 only fraction.",
+   "watch": "Preserve the calm collaboration pattern this period already has."
+  },
+  "f7-fa": {
+   "course": "FA",
+   "title": "Course Systems + Two Job Offers",
+   "unit": "Intro Week",
+   "goal": "Students see that algebra settles a real decision — and get a preview of Unit 1 without being told it's Unit 1.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Entry routine",
+     "d": "Do Now: \"Name one financial decision an adult has to make.\" Attendance."
+    },
+    {
+     "m": 5,
+     "t": "Answer exit tickets",
+     "d": "3-4 questions from yesterday."
+    },
+    {
+     "m": 8,
+     "t": "Phone policy, round 2",
+     "d": "Restate, take questions."
+    },
+    {
+     "m": 13,
+     "t": "FA intro slides (Day 2 version)",
+     "d": "With the interactive inserts."
+    },
+    {
+     "m": 14,
+     "t": "Google Classroom scavenger hunt",
+     "d": "Circulate. Log who can't get in."
+    },
+    {
+     "m": 12,
+     "t": "Two Job Offers",
+     "d": "Vote BEFORE any math. Then groups of 3: \"Convince me with numbers,\" 6 min. Share out. Re-vote — who changed their mind?"
+    },
+    {
+     "m": 2,
+     "t": "Exit ticket",
+     "d": "\"Which offer would you take, and what number convinced you?\""
+    }
+   ],
+   "materials": [
+    "Whiteboard + markers",
+    "Exit slips",
+    "Student devices",
+    "Projector"
+   ],
+   "answers": "Offer A: $19.50 x 40 x 52 = $40,560/yr. Offer B: $41,000/yr, but over 45 hrs x 52 wks = $17.52/hr. A wins per hour, B wins per year and has benefits. No clean answer — that's the point. Land it: \"You just did algebra to make a real decision. That's the whole class.\"",
+   "watch": "Keep it fictional. Never ask students about their own or their family's money."
+  },
+  "f7-fa-p4": {
+   "course": "FA",
+   "title": "Course Systems + Two Job Offers",
+   "unit": "Intro Week",
+   "goal": "Same as Period 2. This period is fast and organized — let the debate run longer if it's going well.",
+   "flow": [
+    {
+     "m": 3,
+     "t": "Bathroom routine FIRST",
+     "d": "State it before you start, not when the first hand goes up."
+    },
+    {
+     "m": 5,
+     "t": "Entry routine",
+     "d": "Do Now + attendance."
+    },
+    {
+     "m": 7,
+     "t": "Phone policy, round 2",
+     "d": "Restate, take questions."
+    },
+    {
+     "m": 14,
+     "t": "FA intro slides (Day 2 version)",
+     "d": "With the interactive inserts."
+    },
+    {
+     "m": 14,
+     "t": "Google Classroom scavenger hunt",
+     "d": "Circulate."
+    },
+    {
+     "m": 14,
+     "t": "Two Job Offers",
+     "d": "Vote, argue with numbers, re-vote. Let it run."
+    },
+    {
+     "m": 2,
+     "t": "Exit ticket",
+     "d": "\"Which offer, and what number convinced you?\""
+    }
+   ],
+   "materials": [
+    "Whiteboard + markers",
+    "Exit slips",
+    "Student devices",
+    "Projector"
+   ],
+   "answers": "Offer A = $40,560/yr, $19.50/hr. Offer B = $41,000/yr, $17.52/hr, plus benefits.",
+   "watch": "Bathroom pass routine. State it up front."
+  },
+  "w2-mon-im1": {
+   "course": "IM1",
+   "title": "Platform Launch Day",
+   "unit": "Intro Weeks",
+   "source": "Matches Mario's actual slide deck order, verified Aug 7: “(Day 3)CCHS Integrated Math 1 Intro Slides(FINAL)”, 15 slides.",
+   "goal": "Every student can get into Clever, ALEKS, and Classtime on their own. The ALEKS diagnostic itself does not start today — access confirmation only, one deliberate step at a time.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Do Now (slide 1)",
+     "d": "Google Classroom warm-up question, complete sentence(s). Attendance while they write."
+    },
+    {
+     "m": 5,
+     "t": "Welcome + Who I Am + Agenda (slides 2-4)",
+     "d": "Room 316, hobbies/background, today's agenda: phone policy, ALEKS access, Classtime access, keep working the scavenger hunt."
+    },
+    {
+     "m": 8,
+     "t": "Expectations block (slides 5-8)",
+     "d": "In-class expectations list, then the full CCHS Cell Phone & Electronic Devices Policy read, then No Foul Language/One Mic/Respect, then The Standard: Preparation & Effort."
+    },
+    {
+     "m": 8,
+     "t": "Course Focus, Overview, Projects (slides 9-11)",
+     "d": "5 course-focus areas, 8-point course overview, how projects work."
+    },
+    {
+     "m": 3,
+     "t": "Grading Breakdown (slide 12)",
+     "d": "10% Classwork, 15% Quizzes, 30% Tests, 30% Projects, 15% Final."
+    },
+    {
+     "m": 6,
+     "t": "ALEKS access check (slide 13)",
+     "d": "Clever → ALEKS → do NOT take the diagnostic → screenshot the dashboard showing it → submit screenshot to Classroom."
+    },
+    {
+     "m": 6,
+     "t": "Classtime access check (slide 14)",
+     "d": "Clever → Classtime → screenshot the dashboard → submit to Classroom."
+    },
+    {
+     "m": 18,
+     "t": "Google Scavenger Hunt, rest of time (slide 15)",
+     "d": "Use whatever's left. No more class time after today — due tomorrow end of day."
+    }
+   ],
+   "materials": [
+    "Student devices",
+    "Clever + ALEKS rosters confirmed",
+    "Slide deck open and ready"
+   ],
+   "watch": "P3 has 61 min, not 59 — give the extra 2 to the scavenger hunt at the end, it's the block built to absorb overflow. If the front (slides 2–12) runs long, the hunt is what shrinks, not the platform steps.",
+   "answers": "No exit ticket is built into this deck — slide 15 just runs out the clock. If you still want one, it fits after the Classtime screenshot, before the hunt."
+  },
+  "w2-mon-fa": {
+   "course": "FA",
+   "title": "Platform Launch Day + Start-of-Year Check",
+   "unit": "Intro Week",
+   "source": "⚠️ UNVERIFIED — Mario only shared the IM1 deck link. This mirrors that deck's confirmed order (he said it's his plan for both courses); course-specific slide content (Course Focus, Overview) is drawn from the real district FA outline, not the IM1 deck. If your FA deck differs, send the link and I'll match it exactly like IM1's.",
+   "goal": "Every student can get into Clever, ALEKS, and Classtime on their own. Stock Market Game setup is NOT happening today — see watch note.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Do Now",
+     "d": "\"Name one financial decision an adult has to make.\" Attendance while they write."
+    },
+    {
+     "m": 5,
+     "t": "Welcome + Who I Am + Agenda",
+     "d": "Room 316, hobbies/background, today's agenda: phone policy, ALEKS access, Classtime access, keep working the scavenger hunt."
+    },
+    {
+     "m": 8,
+     "t": "Expectations block",
+     "d": "In-class expectations, full CCHS Cell Phone & Electronic Devices Policy read, No Foul Language/One Mic/Respect, The Standard: Preparation & Effort."
+    },
+    {
+     "m": 8,
+     "t": "Course Focus, Overview, Projects",
+     "d": "FA framing: applying algebra to income, spending, credit, saving/investing, and business — reasoning about real financial decisions. How FA projects work."
+    },
+    {
+     "m": 3,
+     "t": "Grading Breakdown",
+     "d": "10% Classwork, 15% Quizzes, 30% Tests, 30% Projects, 15% Final — identical to IM1."
+    },
+    {
+     "m": 6,
+     "t": "ALEKS access check",
+     "d": "Clever → ALEKS College Preparedness path → do NOT take the diagnostic → screenshot the dashboard → submit to Classroom."
+    },
+    {
+     "m": 6,
+     "t": "Classtime access check",
+     "d": "Clever → Classtime → screenshot the dashboard → submit to Classroom."
+    },
+    {
+     "m": 18,
+     "t": "Google Scavenger Hunt, rest of time",
+     "d": "Use whatever's left. Due tomorrow end of day."
+    }
+   ],
+   "materials": [
+    "Student devices",
+    "Clever + ALEKS rosters confirmed",
+    "Printed FA Start-of-Year Check (one per student) — hold for a paper backstop, doesn't need its own block if the deck above is tight"
+   ],
+   "watch": "OPEN: Stock Market Game setup has no slot yet. Game launches Wednesday and needs team join done before then — see openQuestions for the recommended fix.",
+   "answers": "No exit ticket is built into this deck — the scavenger hunt runs out the clock. The Start-of-Year Check (built and printed) is a standby backstop, not required today if the deck fits the period on its own."
+  },
+  "w2-tue-im1": {
+   "course": "IM1",
+   "title": "ALEKS Diagnostic + Lesson 1.1 (Day 1)",
+   "unit": "Intro Weeks",
+   "mustDo": true,
+   "standard": "Grade 7 NS 1, 2, 3",
+   "goal": "Students complete the ALEKS initial knowledge check AND get their first real content lesson of the year — adding and subtracting integers. Matches Mario's deck \"(8-11-26) IM1 Diagnostic Test & Lesson 1.1 Notes\", 10 slides.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up (slide 1)",
+     "d": "Number line -10 to 10. Place -7, 4, -1, 0. Then: which is bigger, -7 or -4, and how do you know? That last one is the misconception — watch who gets it wrong."
+    },
+    {
+     "m": 3,
+     "t": "Agenda (slide 3)",
+     "d": "Phone policy revisit, ALEKS diagnostic, Lesson 1.1."
+    },
+    {
+     "m": 5,
+     "t": "Expectations + phone policy (slides 4-5)",
+     "d": "Short. It's a script, not a lesson — read it, take a question, move on."
+    },
+    {
+     "m": 3,
+     "t": "Grading breakdown (slide 6)",
+     "d": "Have them guess the Tests percentage before you reveal it."
+    },
+    {
+     "m": 25,
+     "t": "ALEKS Diagnostic Test (slide 7)",
+     "d": "Clever -> ALEKS -> start the diagnostic. The REAL one this time, not Monday's screenshot. Circulate constantly."
+    },
+    {
+     "m": 8,
+     "t": "Lesson 1.1 Notes (slide 8)",
+     "d": "Same signs / different signs / subtracting. Build it from the number line — don't lead with the rules."
+    },
+    {
+     "m": 8,
+     "t": "Practice + Answer Key (slides 9-10)",
+     "d": "12 mixed problems, then reveal the key and go over it together."
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "Collect or check the practice."
+    }
+   ],
+   "materials": [
+    "Student devices",
+    "ALEKS rosters confirmed",
+    "Number line -20 to 20 posted",
+    "Blank number lines",
+    "Projector"
+   ],
+   "answers": "Practice key: 1) -4  2) -3  3) -11  4) 3  5) -7  6) 5 degrees  7) -13  8) 5  9) 0  10) 0  11) -65 ft  12) 10",
+   "watch": "TIMING RISK: this deck is ~59 min of content and the ALEKS diagnostic alone can run 40. If it does, the practice slides (9-10) don't happen today — carry them to Thursday. That's fine, they're built and they'll keep. Protect the Lesson 1.1 notes over the practice. P3 has 61 min, not 59 — give the extra 2 to the diagnostic. Diagnosing the practice: missed 4 and 10 = subtracting a negative. Missed 1, 5, 8 = different signs. Missed 6 or 11 only = it's the word problems, not the arithmetic."
+  },
+  "w2-tue-fa": {
+   "course": "FA",
+   "title": "Build Your Stax + Career Search",
+   "unit": "Unit 1 — Earning Income",
+   "goal": "Students experience 20 years of investing in 20 minutes, then launch the 10-career search that feeds Comparing Salaries on Thursday. Matches the deck \"(8-11-26) FA Build Your Stax & Career Search\", 6 slides.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Do Now: the $1,000 ranking (slide 1)",
+     "d": "Google Classroom. Rank checking, savings, CD, stocks, cash in a shoebox for 20 years, and say why your #1 is best. KEEP these — they're the debrief."
+    },
+    {
+     "m": 2,
+     "t": "Agenda (slide 2)",
+     "d": "Warm-up, Stax, debrief, career search."
+    },
+    {
+     "m": 3,
+     "t": "Build Your Stax setup (slide 3)",
+     "d": "Open the link from Classroom. Tell them to write down their final number before closing it."
+    },
+    {
+     "m": 22,
+     "t": "Play Build Your Stax",
+     "d": "20 years of investing decisions in ~20 min. Circulate. Pause the room to make a point if it's worth it."
+    },
+    {
+     "m": 12,
+     "t": "Debrief (slide 4)",
+     "d": "What did you buy first, did it change? Who lost money and what did you do? Back to your ranking — what changed? What does 20-years-in-20-minutes hide?"
+    },
+    {
+     "m": 12,
+     "t": "Career Search launch (slide 5)",
+     "d": "10 different jobs/careers on the Job Search sheet: title, industry, entry-level salary, top-out salary, 3 pros, 3 cons. Skip hard-to-research jobs (pro athletes, CEOs). Finish for homework."
+    },
+    {
+     "m": 3,
+     "t": "Exit ticket (slide 6)",
+     "d": "What would you do differently in Stax? Name one career you had never considered."
+    }
+   ],
+   "materials": [
+    "Student devices",
+    "Build Your Stax link posted in Google Classroom",
+    "Job Search sheet posted in Classroom — blank template at Consumer Math (2021-2022)/Chapter 0 - Job Assignments/Job Assignments - Backup/Job Search.xlsx",
+    "Projector"
+   ],
+   "answers": "No right answer on the ranking — that's the point. The usual shock is cash-in-a-shoebox LOSING to inflation over 20 years, and stocks beating savings over long stretches despite the dips. Let the game make the argument.",
+   "watch": "DISTRICT CHECK: this is still Unit 1 Earning Income — the career search IS Unit 1 content, not a detour, and it feeds Thursday's Comparing Salaries directly. Stock Market Game moved OFF today on purpose: the district outline puts the trading seasons at Oct-Dec and Feb-Apr, and SMG team IDs arrive the day AFTER you register. SMG setup gets Wednesday (43 min) as its own lesson. PREP: post the blank Job Search sheet to Google Classroom before class — it's a clean 6-column template (Job Title / Industry / Entry Level Salary / Top Out Salary / 3 pros / 3 cons), no student data in it. SOURCE: the career task is Mario's own Consumer Math Chapter 0, reused verbatim."
+  },
+  "w2-wed-im1": {
+   "course": "IM1",
+   "title": "1.1 Integers — Answer Review + The Valley Number Line",
+   "unit": "Intro Weeks",
+   "mustDo": true,
+   "standard": "Grade 7 NS 1, 2, 3",
+   "type": "Procedural → Application",
+   "goal": "Close the loop on Tuesday's practice set, then make 'subtract a negative' obviously true instead of a rule to memorize — using elevations from their own valley. ALEKS diagnostic already happened Tuesday, so this slot is free for content.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up (slide 11)",
+     "d": "Four problems: 5 − 8, 5 + (−8), −2 − 6, −2 + (−6). Then: 'Look at 1 and 2, then 3 and 4. What do you notice? One sentence.' They discover 'add the opposite' instead of you telling them. Attendance while they write."
+    },
+    {
+     "m": 3,
+     "t": "Agenda + phone policy reset (slides 12–13)",
+     "d": "Day 3 is when phones start creeping back. 60 seconds, not a lecture. Slide 13 is your existing policy slide, unchanged."
+    },
+    {
+     "m": 5,
+     "t": "Self-check against the key (slide 14, then jump back to 10)",
+     "d": "Slide 14 gives the instructions; the answer key is ALREADY slide 10. They mark what they missed — do NOT read 12 answers out loud. Walk the room and note which numbers come up most."
+    },
+    {
+     "m": 8,
+     "t": "Find the Error (slide 15)",
+     "d": "Three worked problems, all wrong. B and C are the SAME mistake — they never changed the subtraction. The question is 'name the mistake,' not 'what's the answer.'"
+    },
+    {
+     "m": 17,
+     "t": "The Valley Number Line (slides 16–17)",
+     "d": "Slide 16 is the elevation table to copy down; slide 17 is the six questions. Q2 forces 8,516 − (−236) — subtracting a negative where the answer HAS to get bigger. That's the whole point of the block."
+    },
+    {
+     "m": 5,
+     "t": "Exit ticket (slide 18)",
+     "d": "−6 − (−10) = ___ , plus 'Why does subtracting a negative make it bigger?' The sentence matters more than the number."
+    }
+   ],
+   "answers": [
+    "Warm-up: 5 − 8 = −3 and 5 + (−8) = −3. −2 − 6 = −8 and −2 + (−6) = −8. Both pairs match — that IS 'add the opposite.'",
+    "Find the Error: A treated 'two negatives make a positive' as an ADDITION rule (it's not) — should be −11. B and C never changed the subtraction to 'add the opposite' — should be 3 and 0.",
+    "Valley: Q2 = 8,752 ft · Q3 = 5,873 ft · Q4 = 1,282 ft · Q5 = 10,834 vs 1,236, so sea level to the peak is far bigger.",
+    "Exit ticket: −6 − (−10) = 4."
+   ],
+   "materials": [
+    "Blank number lines (printed) — vertical orientation for the elevation block",
+    "Tuesday's practice set (students bring their own)",
+    "Class number line −20 to 20 posted above the whiteboards"
+   ],
+   "resources": [
+    "Deck: (8-12-26) IM1 Diagnostic Test & Lesson 1.1 Notes — Wednesday is slides 11–18, built Aug 11"
+   ],
+   "watch": "43-MINUTE PERIOD (P3 gets 46 — give the extra 3 to the Valley block). This does NOT put you behind: 1.2 Coordinate Plane still starts Friday exactly as the pacing calendar says."
+  },
+  "w2-wed-fa": {
+   "course": "FA",
+   "title": "Stock Market Game Launch",
+   "unit": "Unit 1 — Earning Income",
+   "goal": "Teams formed, watchlists drafted, and everyone understands this semester is practice.",
+   "flow": [
+    {
+     "m": 4,
+     "t": "Do Now",
+     "d": "\"Name a company you'd invest $1,000 in. Why?\""
+    },
+    {
+     "m": 20,
+     "t": "How the game works",
+     "d": "Teams, trades, the two seasons."
+    },
+    {
+     "m": 16,
+     "t": "Team setup",
+     "d": "Pick a team name, draft a watchlist of 5 companies."
+    },
+    {
+     "m": 3,
+     "t": "Exit",
+     "d": "\"One thing you want to know about the stock market.\""
+    }
+   ],
+   "materials": [
+    "Student devices",
+    "SMG slides (sanitized copy)"
+   ],
+   "resources": [
+    "FA ('24-'25)/Stock Market Game/Stock Market Game (SMG)_.pptx"
+   ],
+   "watch": "43-MINUTE PERIOD. CHECK SMG REGISTRATION IS CURRENT FOR 2026-27 BEFORE WEDNESDAY. Say out loud that this semester is practice — live competition starts October."
+  },
+  "w2-thu-im1": {
+   "course": "IM1",
+   "title": "1.1 Multiplying & Dividing Integers",
+   "unit": "Intro Weeks",
+   "mustDo": true,
+   "standard": "Grade 7 NS 1, 2, 3",
+   "type": "Procedural → Conceptual",
+   "goal": "Students DERIVE the sign rules for × and ÷ from a pattern instead of being told them — and can tell those rules apart from Tuesday's addition rules. Also closes the Valley Number Line, which went home as homework Wednesday.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Entry — silent, individual (slide 1)",
+     "d": "On yesterday's homework paper: 'Copy your answer to #2 and #6.' No talking. Take attendance while they write. This is the warm-up AND the homework check in one move."
+    },
+    {
+     "m": 5,
+     "t": "Valley close-out (slide 6)",
+     "d": "TWO answers only: #2 = 8,752 ft, then #6 — the idea. Cold-call three students WITH WARNING ('Marcus, coming to you after Jasmine'). Do NOT review all six questions."
+    },
+    {
+     "m": 14,
+     "t": "Multiplication — derived, not told (slides 7–9)",
+     "d": "Repeated addition first: 3×(−2) = (−2)+(−2)+(−2). Then the descending ladder. STOP at −1×(−2) and make them predict. Ask: 'Left side drops by 1 each time — what's the answer doing?' It goes UP by 2. They derive it."
+    },
+    {
+     "m": 6,
+     "t": "Division falls out (slide 10)",
+     "d": "'What times −3 gives −12?' Three examples, same sign rules, done. Don't over-teach this — it's the same rule they just derived."
+    },
+    {
+     "m": 12,
+     "t": "Structured practice — 3 timed rounds (slides 11–12)",
+     "d": "NOT open work time. Round 1: silent solo, 4 min. Round 2: partner compare and resolve disagreements, 4 min. Round 3: three students called to show work, 4 min. Timer projected each round."
+    },
+    {
+     "m": 15,
+     "t": "CLASSTIME — 3 problems + breakdown (slide 13)",
+     "d": "Devices out now, not before. One problem at a time: they answer → show the distribution → break it down → next. This IS the consolidation, not an add-on."
+    },
+    {
+     "m": 2,
+     "t": "Land it (slide 14)",
+     "d": "One sentence naming the rule. Assign Integer Flashcards."
+    }
+   ],
+   "answers": [
+    "Valley #2: 8,516 − (−236) = 8,752 ft. #6 is explanatory — no number.",
+    "The ladder: −1×(−2)=2 · −2×(−2)=4 · −3×(−2)=6. Rule: same signs → positive, different signs → negative. Works for × and ÷ both.",
+    "Practice: 1) −12  2) −10  3) 24  4) 21  5) −5  6) −5  7) 4  8) −6 (three negatives — stretch)",
+    "CLASSTIME: 1) (−4)×3 = −12 · 2) −12÷(−3) = 4 · 3) −3+(−4) = −7 ← THE TRAP"
+   ],
+   "materials": [
+    "Yesterday's homework paper (students bring)",
+    "Projected timer for the practice rounds",
+    "Student devices — CLOSED until minute 42",
+    "Classtime session built with the 3 problems"
+   ],
+   "resources": [
+    "Deck: (8-13-26) Lesson 1.1 Multiplying & Dividing Integers",
+    "Integer Flashcards — mendez84.github.io/classwebsite-fall-2026-v2/integer-flashcards.html",
+    "Classtime question bank: Strategic Thinking in Math → HS Integrated Pathway → Math 1"
+   ],
+   "watch": "🔴 CLASSTIME #3 IS THE POINT. −3 + (−4) — expect a real chunk of the class to answer +7 after a day of 'two negatives make a positive.' That's the SAME misconception as Find the Error problem A yesterday, and today's lesson makes it STRONGER unless you name it. Breaking that one down is worth more than the other two combined. If time runs short, drop problem 2 — never 3. P3 has 61 min; give the extra 2 to practice, not Classtime. NO whiteboards today — that's Wednesdays."
+  },
+  "w2-thu-fa": {
+   "course": "FA",
+   "title": "Unit 1 — Career Research Workday and Source Check",
+   "unit": "Unit 1 — Earning Income",
+   "goal": "Students will finish their career research, verify salary data and sources, and prepare accurate annual-salary information for Friday's assigned-job pay conversions.",
+   "standard": "Unit 1 earning-income algebra application [from district outline, not confirmed as a numbered standard]",
+   "type": "Application / Research",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 5,
+     "t": "Entry",
+     "d": "Silent: 'What makes a career-salary source trustworthy enough to use in a math problem?' Write two checks."
+    },
+    {
+     "m": 5,
+     "t": "Bridge",
+     "d": "Share two answers. Clarify that research is due Thursday end of day; Friday begins assigned jobs and pay conversions."
+    },
+    {
+     "m": 15,
+     "t": "Launch",
+     "d": "Model a fictional source check: verify job title, location, entry-level versus top-out salary, source, and date. Explain that Friday's math depends on accurate annual-salary data."
+    },
+    {
+     "m": 22,
+     "t": "Practice",
+     "d": "Timed research workday. Students finish the 10-career sheet and repair missing or unclear entries. Required product: job title, industry, entry-level salary, top-out salary, three pros, three cons, and source/location note for each career."
+    },
+    {
+     "m": 8,
+     "t": "Consolidate",
+     "d": "Partner quality check: title, industry, salary type, location, source. Partners mark one item to verify; each student makes one correction."
+    },
+    {
+     "m": 4,
+     "t": "Land",
+     "d": "Exit: name the career you are most prepared to calculate tomorrow, its annual salary, and its source/location. Submit or save today's completed research."
+    }
+   ],
+   "materials": [
+    "Students' career-search sheets",
+    "Chromebooks",
+    "Board/projector",
+    "CareerOneStop Salary Finder",
+    "Research completion checklist"
+   ],
+   "resources": [
+    "Old Lessons & Resources/FA (_24-_25)/Unit 1_ Income/Lesson 1_ Comparing Salaries.docx (colleague original — read-only; copy/sanitize before student use)",
+    "Old Lessons & Resources/FA (_24-_25)/Unit 1_ Income/Unit 1_ Income [2024].pptx (colleague original — read-only; copy/sanitize before student use)",
+    "Old Lessons & Resources/Consumer Math (2021 - 2022)/Chapter 1 Gross Income/Ch. 1 - Job Information Project.pptx (Mario's own resource)",
+    "Old Lessons & Resources/Consumer Math (2021 - 2022)/Chapter 1 Gross Income/Ch. 1 Task 1 - Job Research.docx (Mario's own resource)",
+    "District-facing Lesson 1 — Comparing Salaries (CareerOneStop salary finder + pay-period table): https://docs.google.com/document/d/1ZwuA4kk79urTFu0EZlSqZECRKDQqxPiT/edit"
+   ],
+   "answers": "No single salary answer today. Research is ready when each career has a specific title, industry, clearly labeled entry-level and top-out salaries, location/search setting, and source/date. Friday's conversion map: annual ÷ 12 = monthly; ÷ 26 = biweekly; ÷ 52 = weekly; ÷ 2,080 = hourly.",
+   "watch": "Mario confirmed Aug 12 that students have until Thursday end of day to finish the career search and that assigned jobs/pay conversions move to Friday morning. Do not assign jobs or repeat the search Thursday. Prepare the checklist, CareerOneStop link, and fictional source-check example. Use a visible 22-minute timer and circulate. Spanish support: pair each label with a visual example and allow source notes in Spanish when the required data are clear. This is a 59-minute plan for both P2 and P4.",
+   "source": "Thursday change is from Mario's Aug 12 classroom update. The research/source-check structure follows the current district-facing Comparing Salaries document and Unit 1 earning-income materials [from district outline, not confirmed as a numbered standard]."
+  },
+  "w2-fri-im1": {
+   "course": "IM1",
+   "title": "Integers Review + Practice Quiz",
+   "unit": "Intro Weeks",
+   "mustDo": true,
+   "standard": "Grade 7 NS — 7.NS.A.1b, 7.NS.A.2a",
+   "type": "Review → Assess",
+   "goal": "Close the two specific errors Thursday's Classtime exposed — dropped signs on × and ÷, and stopping after one answer on a 'select ALL' — then measure it with a 20-question quiz. Also clears the missing-work backlog before Module 3 starts next week.",
+   "flow": [
+    {
+     "m": 10,
+     "t": "Warm-Up — the two Classtime questions (slide 1)",
+     "d": "Recap-of-yesterday variant. Both questions are ON the slide; the full script is in the SPEAKER NOTES of slide 1 — read those before class. Do them together, out loud. Q1 is the sign-rule fix (3 min), Q2 is the number-line story (5 min, this is the important one)."
+    },
+    {
+     "m": 2,
+     "t": "Title + Agenda (slides 2–3)",
+     "d": "Review Day — Integers Practice Quiz. Materials: pencil, paper, Chromebook. Name the four things on the agenda so they know the quiz is coming."
+    },
+    {
+     "m": 15,
+     "t": "Policies & Procedures (slides 4–8)",
+     "d": "The carried expectations block — cell phones, no foul language / one mic / respect, preparation & effort, grading breakdown. Week 2, so move briskly; this is a reminder, not a first teach."
+    },
+    {
+     "m": 20,
+     "t": "Integers Practice Quiz — 20 questions (slide 9)",
+     "d": "Google Form, posted to Classroom under Week 1. 5 adding · 5 subtracting · 5 multiplying · 5 dividing. Self-grading — you get the item analysis instantly. Say the two rules out loud before they start: show work on paper, and answer all 20 (a guess beats a blank). Circulate; do not help with signs — that is what you are measuring."
+    },
+    {
+     "m": 8,
+     "t": "Catch-Up Checklist (slide 10)",
+     "d": "Six items on the slide. Whoever finishes the quiz early starts here. Project it and leave it up. This is the backlog clear before Module 3."
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "One sentence: 'Same signs → positive. Different signs → negative.' Monday we move to the coordinate plane."
+    }
+   ],
+   "answers": [
+    "WARM-UP Q1: answer is B, −39. Distractors 39 and 11 are sign errors, not arithmetic errors.",
+    "WARM-UP Q2 — TWO correct: −4 + 10 = 6 AND 6 − 10 = −4. Same arrow read forward and backward.",
+    "Q2 wrong answers: 10 − 4 = 6 (right number, but the arrow doesn't start at 10 — the trap) · −4 − 6 = −10 (lands on −10) · |−6| + (−4) = 2 (lands on 2).",
+    "QUIZ: the Google Form is in quiz mode with the answer key built in — it grades itself. Full key is in Assessments/IM1_Integers_Practice_Quiz_FORM_BUILDER.gs."
+   ],
+   "materials": [
+    "🔴 BEFORE 8:45 — paste Q1's real expression onto slide 1 (it was an image in Classtime; answer is B, −39)",
+    "🔴 BEFORE 8:45 — DRAW the Q2 number line on the board: a line from about −10 to 10 with an arrow from −4 to 6. Students cannot answer Q2 without it. Leave it up.",
+    "Slide 1 SPEAKER NOTES — the whole warm-up script is there, including both of the above",
+    "Google Form posted to Classroom (both P1 and P3) BEFORE first period",
+    "Paper — they show work even though the Form is digital"
+   ],
+   "resources": [
+    "Deck: (8-14-26) Integers Review & Practice Quiz(class slides) — docs.google.com/presentation/d/1jDhfWOUUL6YatfdUDqPmC_rlxe2NfpQ_8iU4czf6RrY",
+    "Form builder script: #Teaching System/Assessments/IM1_Integers_Practice_Quiz_FORM_BUILDER.gs",
+    "Source data: Classtime results 8-13-26, Periods 1 and 3"
+   ],
+   "watch": "🔴 THE DATA, so you know why this day exists: Q1 (sign rules) — 56% correct in P1, 48% in P3. About half. Q2 (number line, select ALL) — only 16% fully correct in BOTH periods, but ZERO students scored 0. They found one right answer and stopped reading. That is a test-taking miss, not a math miss, and it is fixable in five minutes. Say it plainly: 'select ALL means there is more than one.' P3 has 61 min — give the extra 2 to the Catch-Up Checklist, not the quiz. If the quiz runs long, cut the policies block, not the warm-up."
+  },
+  "w3-mon-im1": {
+   "course": "IM1",
+   "title": "1.2 Graphing on a Coordinate Plane (Day 1)",
+   "unit": "Intro Weeks",
+   "mustDo": true,
+   "standard": "Grade 6 NS 8",
+   "goal": "Students plot and read points in all four quadrants, and learn that a point ON an axis is in NO quadrant. Last must-do review (Grade 6 NS 8) before Module 3. Deck is already built — this plan matches the 11 slides that exist, not a rebuild.",
+   "flow": [
+    {
+     "m": 8,
+     "t": "Warm-Up — quadrant signs table (slide 1)",
+     "d": "Draw a coordinate plane on paper: label both axes with positives AND negatives, label all 4 quadrants, fill the signs table, plot a point in Q2 and Q4. The slide also asks: point (0, -4) — which quadrant? THAT IS THE TRAP and it's the whole point of the lesson. Let them answer wrong, then use it in the notes."
+    },
+    {
+     "m": 2,
+     "t": "Title + Agenda (slides 2–3)",
+     "d": "Lesson 1.2 Coordinate Plane. Materials: graph paper, pencil, ruler, colored pencils. NOTE: the expectations block (slides 4–8) ends Friday 8/14 — skip it Monday unless you want it. This plan assumes you skip."
+    },
+    {
+     "m": 12,
+     "t": "Notes: The Coordinate Plane — COPY THIS INTO YOUR NOTES (slide 9)",
+     "d": "Start at the origin. Move x FIRST, then y. Quadrant signs Q1(+,+) Q2(−,+) Q3(−,−) Q4(+,−). Then the two things that actually cause errors: a point on an axis has NO quadrant, and (3,−2) is not the same point as (−2,3). Come back to the warm-up's (0,−4) here — that's your payoff."
+    },
+    {
+     "m": 15,
+     "t": "Practice Problems — plot & name (slide 10)",
+     "d": "Six points: A(3,5) B(−2,4) C(−5,−3) D(4,−6) E(0,−4) F(−6,0). Plot all six, then name each quadrant. Circulate — the x-before-y flip is the error to catch, and E and F are the axis check."
+    },
+    {
+     "m": 20,
+     "t": "Assignment: Name on the Coordinate Plane (slide 11)",
+     "d": "His own 2021 assignment, already on the slide: write your first name on the grid using straight line segments only, at least 2 quadrants, label EVERY point, list the points in order, turn in on Classroom. Due end of class. Start it here so you can see who's lost."
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "Plot (−3, 4). Which quadrant, and how do you know? (Q2 — x negative, y positive.)"
+    }
+   ],
+   "materials": [
+    "Graph paper — 2 sheets per student (warm-up + the Name assignment)",
+    "Rulers — the assignment says straight lines only, and it matters",
+    "Colored pencils (district UDL note: color-code x vs y)",
+    "Deck is built and needs no edits: (8-17-26) Lesson 1.2 Coordinate Plane(class slides)"
+   ],
+   "answers": [
+    "WARM-UP: Q1(+,+) · Q2(−,+) · Q3(−,−) · Q4(+,−). Point (0,−4) is ON the y-axis — NO quadrant. That is the trap and the hook for the notes.",
+    "PRACTICE (slide 10): A(3,5) Q1 · B(−2,4) Q2 · C(−5,−3) Q3 · D(4,−6) Q4 · E(0,−4) on the y-axis, no quadrant · F(−6,0) on the x-axis, no quadrant.",
+    "EXIT: (−3,4) is Quadrant 2 — x is negative, y is positive.",
+    "ASSIGNMENT: no fixed key — spot-check 3 labeled points per paper against where they actually sit on the grid."
+   ],
+   "watch": "Moved here from Fri Aug 14 — that day became Integers Review + Practice Quiz after Thursday's Classtime showed ~50% of both periods dropping signs. Deck is already built: (8-17-26) Lesson 1.2 Coordinate Plane(class slides) — docs.google.com/presentation/d/1eQXtOjxxNRRAioFUQvku8hkU5wmpkNvxriZFVUZOnl4. P3 has 61 min — give the extra 2 to the Name assignment. The axis points in CC2 (E and F) are the misconception check: a point ON an axis is in NO quadrant.\n\n🔴 PACING DECISION YOU OWE YOURSELF THIS WEEKEND. The Aug 12 pacing calendar assumed Mon 8/17 was Coordinate Plane DAY 2. It is now DAY 1, so Week 3 is one more day behind on top of the STAR Aug 18 slip. Two ways out:\n  (A) RECOMMENDED — make Coordinate Plane a ONE-day lesson (today only). It is Grade 6 NS 8 review, not new content, and the Name-on-the-Coordinate-Plane assignment finishes at home. Then Thu 8/20 = 1.3 Numerical Expressions compressed to one day, and Module 3 starts Fri 8/21 — only 1 day behind the district.\n  (B) Keep it as 2 days: Day 2 lands Thu 8/20, 1.3 goes to Fri 8/21, and Module 3 slips to Mon 8/24 — 2 days behind, on a semester that was already ~1 week tight. That cost comes out of Module 8 (Linear vs. Exponential) in December.\nDo NOT solve this by taking Wednesday 8/19 — that is the required Keep Skills Alive + ALEKS day, and it is only 43 minutes.",
+   "type": "Review — Conceptual"
+  },
+  "w2-fri-p2-fa": {
+   "course": "FA",
+   "title": "Unit 1 Lesson 1.1 — Comparing Salaries",
+   "unit": "Unit 1 — Earning Income",
+   "goal": "Students will convert an annual salary into monthly, biweekly, weekly, and hourly pay, including the 40-hours-per-week assumption behind hourly pay.",
+   "standard": "Unit 1 earning-income algebra application [from district outline, not confirmed as a numbered standard]",
+   "type": "Conceptual / Procedural / Application",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up",
+     "d": "Students place one researched career and annual salary on a no-name assignment card; collect and shuffle."
+    },
+    {
+     "m": 2,
+     "t": "Title",
+     "d": "Unit 1 | Lesson 1.1 — Comparing Salaries. Distribute a randomized card and neutral Job ID."
+    },
+    {
+     "m": 3,
+     "t": "Goals",
+     "d": "State the learning target and essential question about why pay frequency matters."
+    },
+    {
+     "m": 9,
+     "t": "Notes (Take Notes)",
+     "d": "Paper notes: annual / 12 monthly, / 26 biweekly, / 52 weekly, / 2,080 hourly. State that 2,080 = 40 hours/week x 52 weeks/year."
+    },
+    {
+     "m": 8,
+     "t": "Example 1 — I Do",
+     "d": "Model monthly and weekly conversion, labeling units and rounding to cents."
+    },
+    {
+     "m": 7,
+     "t": "Concept Check 1 — You Do",
+     "d": "One biweekly and one semimonthly problem, then brief correction."
+    },
+    {
+     "m": 7,
+     "t": "Example 2 — I Do",
+     "d": "Model all four conversions from an assigned career; students name each divisor before calculating."
+    },
+    {
+     "m": 8,
+     "t": "Concept Check 2 — You Do",
+     "d": "One complete conversion set, then students begin their own assigned-career row."
+    },
+    {
+     "m": 8,
+     "t": "Assignment",
+     "d": "Record career, annual salary, and two conversions. Exit: explain the 2,080 assumption."
+    },
+    {
+     "m": 2,
+     "t": "Buffer",
+     "d": "Collect cards and name Monday's next step."
+    }
+   ],
+   "materials": [
+    "Existing Comparing Salaries slide deck",
+    "Paper for guided notes",
+    "Small blank assignment cards",
+    "Calculators",
+    "District-side FA Unit 1 Assigned Careers Master"
+   ],
+   "resources": [
+    "Old Lessons & Resources/FA (_24-_25)/Unit 1_ Income/Lesson 1_ Comparing Salaries.docx (colleague original — read-only)",
+    "Old Lessons & Resources/Consumer Math (2021 - 2022)/Chapter 1 Gross Income/Ch. 1 - Job Information Project.pptx (Mario's own resource)",
+    "District FA Unit 1 Assigned Careers Master: https://docs.google.com/spreadsheets/d/1NIdXfp3rMS6O5aBO6MyJFXEfo2fMZLn5YVm2wjV2Nsc/edit"
+   ],
+   "answers": "Monthly = annual / 12; biweekly = annual / 26; semimonthly = annual / 24; weekly = annual / 52; hourly = annual / 2,080. Round to cents.",
+   "watch": "P2 needs the complete Lesson 1.1 because P4 received it Thursday. Use paper guided notes, not student copies of the deck. Do not attempt to compile all ten researched careers per student. One accurate, public career per student is enough for the randomized job draw and the ongoing Unit 1 context. This intentionally defers P2's Friday ALEKS block because the catch-up lesson is the priority.",
+   "source": "Mario's Aug 13 classroom update plus existing Comparing Salaries materials; Unit 1 placement is from district pacing [from district outline, not confirmed as a numbered standard]."
+  },
+  "w2-fri-p4-fa": {
+   "course": "FA",
+   "title": "Unit 1 — Assigned Career Application + ALEKS",
+   "unit": "Unit 1 — Earning Income",
+   "goal": "Students will apply salary conversions to a randomized assigned career, then complete the protected ALEKS College Preparedness block.",
+   "standard": "Unit 1 earning-income algebra application [from district outline, not confirmed as a numbered standard]",
+   "type": "Application / Practice",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 5,
+     "t": "Entry",
+     "d": "Students write one researched career, annual salary, and source/location on a no-name card."
+    },
+    {
+     "m": 8,
+     "t": "Job Draw",
+     "d": "Shuffle cards, redistribute, and assign neutral Job IDs. Class master shows Job IDs, not student names."
+    },
+    {
+     "m": 10,
+     "t": "Applied Conversion",
+     "d": "Silent timed calculation: monthly and biweekly pay for the assigned career; pair check after time."
+    },
+    {
+     "m": 6,
+     "t": "Error Check",
+     "d": "Correct one common error: using 24 for biweekly or omitting the 40-hours-per-week hourly assumption."
+    },
+    {
+     "m": 30,
+     "t": "ALEKS College Preparedness",
+     "d": "Protected individual work; circulate and monitor 5–10 topics/week progress."
+    }
+   ],
+   "materials": [
+    "Small blank assignment cards",
+    "Calculators",
+    "Chromebooks",
+    "District-side FA Unit 1 Assigned Careers Master"
+   ],
+   "resources": [
+    "Old Lessons & Resources/Consumer Math (2021 - 2022)/Chapter 0 - Job Assignments/Job Search.xlsx (blank resource only; do not open student-response files)",
+    "District FA Unit 1 Assigned Careers Master: https://docs.google.com/spreadsheets/d/1NIdXfp3rMS6O5aBO6MyJFXEfo2fMZLn5YVm2wjV2Nsc/edit"
+   ],
+   "answers": "Monthly = annual / 12; biweekly = annual / 26. Hourly conversion uses annual / 2,080, where 2,080 assumes 40 hours/week for 52 weeks.",
+   "watch": "P4 completed the base Comparing Salaries lesson Thursday. Keep Friday as application, not an early start on paycheck deductions. The 30-minute ALEKS block fulfills the adopted Friday rhythm. Enter only neutral Job ID, career, annual salary, and source in the view-only master after class; never add public student names.",
+   "source": "Mario's Aug 13 classroom update; Unit 1 and Friday ALEKS rhythm are from district pacing [from district outline, not confirmed as a numbered standard]."
+  },
+  "w7-wed-fa": {
+   "course": "FA",
+   "title": "Unit 2 — Decimal Multiplication and Percent Amounts: Skill Repair",
+   "unit": "Unit 2 — Living & Spending",
+   "goal": "Students review multiplying decimals and calculating percent amounts without relying on a calculator.",
+   "standard": "CA CCSS 6.NS.B.3 and 7.RP.A.3 supporting skills; CA CCSS N-Q.1; SMP 1 and SMP 6.",
+   "type": "Skill Repair / Procedural",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 43,
+     "t": "Actual class record — not reconstructed",
+     "d": "Mario reviewed multiplying decimals and finding percent amounts without calculators. Students did not finish the planned practice during the 43-minute Wednesday periods."
+    }
+   ],
+   "materials": [
+    "Paper",
+    "Pencil",
+    "(9-16-26) Unit 2 Skill Practice — Multiplying Decimals & Percents slide deck"
+   ],
+   "resources": [
+    "District Unit 2 folder: Multiplying Decimals & Percents skill-practice deck"
+   ],
+   "answers": "Teacher used decimal-multiplication and percent-amount practice; the class did not finish the lesson.",
+   "watch": "Actual classroom record from Mario. Do not mark this lesson complete. Continue the unfinished no-calculator decimal and percentage work Thursday before beginning Practice Test A review. The normal Wednesday stock-market check-in did not occur this week.",
+   "source": "Mario's Sep 16, 2026 classroom update."
+  },
+  "w7-thu-fa": {
+   "course": "FA",
+   "title": "Unit 2 — Finish Decimal and Percentage Skill Repair + Practice Test A Review",
+   "unit": "Unit 2 — Living & Spending",
+   "goal": "Students finish no-calculator decimal and percent practice, then correct and understand Unit 2 Practice Test Version A problems before Friday's test.",
+   "standard": "CA CCSS N-Q.1; CA CCSS A-CED.1; 7.RP.A.3 supporting skill; SMP 1, SMP 4, and SMP 6.",
+   "type": "Skill Repair / Review",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 7,
+     "t": "Warm-Up — finish Wednesday's work",
+     "d": "Students reopen their paper and complete unfinished multiplying-decimals and percent-amount problems without calculators. Attendance while they work."
+    },
+    {
+     "m": 12,
+     "t": "Correct the skill practice",
+     "d": "Model only the sticking points: multiply as whole numbers, count all decimal places, place the decimal, then estimate whether the answer is reasonable. Connect percent to a decimal before multiplying."
+    },
+    {
+     "m": 35,
+     "t": "Unit 2 Practice Test Version A — guided review",
+     "d": "Students attempt each selected problem on paper before the class discusses it. Go over the correct setup, calculation, vocabulary, and final answer. Require students to fix their own work rather than copy an answer key."
+    },
+    {
+     "m": 5,
+     "t": "Test-prep close",
+     "d": "Students star the two Unit 2 skills they still need to review and keep the corrected Practice Test A for Friday."
+    }
+   ],
+   "materials": [
+    "Unit 2 Practice Test Version A",
+    "Unit 2 Practice Test A answer key",
+    "Students' Wednesday decimal/percent work",
+    "Paper and pencils",
+    "Projector / class slides"
+   ],
+   "resources": [
+    "Unit 2 Practice Test Version A and its student-facing answer key in the Unit 2 district folder",
+    "(9-16-26) Unit 2 Skill Practice — Multiplying Decimals & Percents slide deck"
+   ],
+   "answers": "Use the existing Unit 2 Practice Test A answer key. For decimal work, require vertical multiplication, correct decimal-place placement, a reasonableness estimate, and money labels where applicable.",
+   "watch": "Mario-confirmed plan. Keep Thursday focused: finish the prerequisite skill repair, then review Practice Test A. Do not add a new Unit 2 lesson. This replaces the normal Thursday flow for one day.",
+   "source": "Mario's Sep 16, 2026 classroom update."
+  },
+  "w7-fri-fa": {
+   "course": "FA",
+   "title": "Unit 2 — Assessment",
+   "unit": "Unit 2 — Living & Spending",
+   "goal": "Students independently demonstrate Unit 2 understanding of budgets, expenses, discounts, inflation, unit prices, saving, and percentage calculations.",
+   "standard": "CA CCSS N-Q.1; CA CCSS A-CED.1; 7.RP.A.3 supporting skill; SMP 1, SMP 4, and SMP 6.",
+   "type": "Assessment",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 5,
+     "t": "Launch",
+     "d": "Distribute the final Unit 2 assessment, review allowed materials and test expectations, and clarify that students show required work."
+    },
+    {
+     "m": 50,
+     "t": "Independent Unit 2 test",
+     "d": "Students complete the assessment independently. Circulate for directions-only support; do not coach individual problems."
+    },
+    {
+     "m": 4,
+     "t": "Turn in and close",
+     "d": "Collect or confirm submission, then direct early finishers to quiet independent work."
+    }
+   ],
+   "materials": [
+    "Final Unit 2 assessment",
+    "Pencils",
+    "Approved calculator only if the assessment directions permit it"
+   ],
+   "resources": [
+    "Unit 2 assessment file in the Unit 2 district folder [confirm final test version before printing or posting]"
+   ],
+   "answers": "Use the teacher-only Unit 2 assessment key. Award credit for correct setup and shown work according to the assessment directions.",
+   "watch": "Mario-confirmed test date. The pacing calendar places the Unit 2 test during Week 8, so this Friday assessment is earlier than the suggested window; do not move it unless Mario changes the plan. No additional recurring block was scheduled during the assessment.",
+   "source": "Mario's Sep 16, 2026 classroom update; pacing-window note from the local FA pacing calendar [from district outline, not confirmed]."
+  },
+  "w8-fri-fa": {
+   "course": "FA",
+   "title": "Unit 3, Lesson 3 — Online Banking: Digital Banking Challenge",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "goal": "Students use a simulated online bank account to interpret transactions and balances, plan a bill payment or transfer, and explain how digital tools can help avoid overdrafts.",
+   "standard": "CA CCSS N-Q.1 and A-CED.A.1 supporting modeling skills; SMP 1, SMP 4, and SMP 6.",
+   "type": "Interactive Simulation / Applied Financial Literacy",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 5,
+     "t": "Launch",
+     "d": "Pairs open the NGPF Bank Simulator and select Get Started Now. State the challenge: keep a simulated account healthy by reading it carefully and making sound decisions. No real financial information is used."
+    },
+    {
+     "m": 5,
+     "t": "Mini-lesson / model",
+     "d": "Use the existing Online Banking deck to identify checking activity, available balance, bills, transfers, and alerts. Model locating a transaction and deciding whether it raises or lowers the balance."
+    },
+    {
+     "m": 30,
+     "t": "Digital Banking Challenge",
+     "d": "Pairs complete three scored simulator missions: Account Detective (current balance plus two labeled credit/debit transactions); Bill Watch (upcoming/scheduled bill and its balance impact); Savings Move (one-time checking-to-savings transfer, then verify both balances). Students record evidence and reasoning on paper."
+    },
+    {
+     "m": 10,
+     "t": "Banker briefing",
+     "d": "Pairs give a 30-second report: one feature used, one risk it helps prevent, and one simulator evidence point. Award points for accurate evidence and reasoning, not speed alone."
+    },
+    {
+     "m": 5,
+     "t": "Debrief",
+     "d": "Compare strategies for checking activity, planning bills, and protecting a balance. Connect choices to avoiding an overdraft."
+    },
+    {
+     "m": 4,
+     "t": "Exit / close",
+     "d": "Individually answer: Which online-banking feature would most help you avoid an overdraft, and why?"
+    }
+   ],
+   "materials": [
+    "Existing Online Banking Lesson 3 deck",
+    "Projector and student Chromebooks",
+    "Paper/pencils for mission evidence",
+    "NGPF Bank Simulator"
+   ],
+   "resources": [
+    "Mario's Consumer Math Lesson 3 Online Banking deck and interactive reference",
+    "NGPF Bank Simulator: https://www.ngpf.org/bank-sim/"
+   ],
+   "answers": "Credit raises a balance; debit lowers it. Valid mission evidence must come from the current simulator screen. Strong exit responses name a concrete online-banking tool (for example: transaction history, balance alerts, bill-pay scheduling) and connect it to avoiding an overdraft.",
+   "watch": "This is a deliberate Friday substitution: move directly to online banking rather than use the traditional check-register lesson. The older Mario interactive directs account creation and fixed January/May simulator dates; do not use those directions verbatim because the verified current simulator starts with Get Started Now. Do not use real financial information or the Deposit Checks feature, which requires image uploads. Browser/Classroom evidence shows Lesson 3.1 was posted and accessed in P2 on Sep 24; P4 matching delivery is [GUESS — confirm].",
+   "source": "District FA scope (Unit 3: Savings & Checking Accounts); Mario's Consumer Math Lesson 3 Online Banking; NGPF Bank Simulator verified Sep 24, 2026; Sep 24 P2 Classroom/browser evidence."
+  },
+  "w9-mon-fa": {
+   "course": "FA",
+   "title": "Unit 3 — Mobile Banking & Payment Apps: Payment Choice & Security",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "goal": "Students distinguish peer-to-peer payments, mobile wallets, debit cards, and credit cards, then use security reasoning to evaluate a digital-payment choice.",
+   "standard": "CA CCSS N-Q.1 supporting quantitative and financial-literacy reasoning; SMP 1, SMP 3, and SMP 6.",
+   "type": "New Content / Applied Financial Literacy",
+   "mustDo": true,
+   "flow": [
+    {
+     "m": 8,
+     "t": "Warm-Up — payment choices",
+     "d": "Students answer the existing source prompts: What factors matter when choosing a payment app? Can a payment app replace a checking account? Explain. Keep answers general; no personal account information."
+    },
+    {
+     "m": 2,
+     "t": "Title",
+     "d": "Mobile Banking & Payment Apps."
+    },
+    {
+     "m": 3,
+     "t": "Learning target and essential question",
+     "d": "LT: I can distinguish among peer-to-peer payments, mobile wallets, debit cards, and credit cards. EQ: What makes a digital payment convenient and safe?"
+    },
+    {
+     "m": 10,
+     "t": "Notes — payment methods",
+     "d": "Teach the source definitions of P2P payment, mobile payment/mobile wallet, debit card, and credit card. Connect them to Friday's account activity, transfers, and bills."
+    },
+    {
+     "m": 8,
+     "t": "Example 1 — P2P payment flow",
+     "d": "Model how money moves between people through an app linked to a bank account or debit card; the recipient's email/phone identifies the transfer, not the sender's account number."
+    },
+    {
+     "m": 8,
+     "t": "Concept Check 1",
+     "d": "Pairs answer: What technology allows a mobile payment to work? How is a P2P-app checkout different from a plastic card? What does it mean to authenticate a payment?"
+    },
+    {
+     "m": 8,
+     "t": "Example 2 — safety choice",
+     "d": "Model how to evaluate source safety tips: strong password, multi-step verification/PIN/biometric, transaction notifications, and only paying people you know. Separate convenience from protection."
+    },
+    {
+     "m": 8,
+     "t": "Concept Check 2",
+     "d": "Pairs choose the three source security tips they judge most important and give a one-sentence reason for each. Accept different choices only with defensible reasoning."
+    },
+    {
+     "m": 4,
+     "t": "Assignment / exit",
+     "d": "Complete the source closing comparison: P2P vs. cash/debit—one similarity, one P2P advantage, and one cash/debit advantage."
+    }
+   ],
+   "materials": [
+    "Mario's Mobile Banking & Payment Apps deck",
+    "Projector",
+    "Paper and pencils"
+   ],
+   "resources": [
+    "Mario's Consumer Math Lesson 4 Mobile Banking & Payment Apps deck",
+    "Bundled What Are Peer-to-Peer Payments? reading",
+    "Colleague Ways to Pay deck as read-only reference"
+   ],
+   "answers": "P2P is a digital person-to-person transfer usually linked to a bank account or debit card. A mobile wallet pays from a phone; debit uses deposited funds; credit borrows funds to repay. NFC (near-field communication) enables an in-store mobile-wallet tap; P2P transfers use the app/internet connection. Authentication verifies the account holder (PIN, biometric, or multi-step verification). Strong responses name a genuine convenience/security tradeoff.",
+   "watch": "[GUESS — confirm] Move to this lesson only if Friday's Digital Banking Challenge was completed. If either class needs more simulator time, use Monday as a Day 2 instead. Keep all discussion fictional/general; never solicit personal banking data. No FA ALEKS block.",
+   "source": "Mario's Consumer Math Lesson 4 Mobile Banking & Payment Apps; colleague Unit 3 Ways to Pay reference; district FA Unit 3 scope."
+  },
+  "w9-mon-im1": {
+   "course": "IM1",
+   "title": "4.3 Graphing Linear Functions (Day 1) — Sequences to Lines",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "Review Grade 8 F.2, F.3, F.4 (district 4.3)",
+   "goal": "Students turn a sequence into an equation — y = (jump) × x + (term 0) — and graph it as a line. Approved and built Sep 27 (EN + Vietnamese decks). Say 'jump' and 'term 0'; no 'slope' or 'y = mx + b' yet.",
+   "flow": [
+    {
+     "m": 6,
+     "t": "Warm-Up (slide 1)",
+     "d": "3, 5, 7, 9 on numbered lines → write the points; what comes right before the 3?"
+    },
+    {
+     "m": 2,
+     "t": "Title + Goals",
+     "d": "Target: I can turn a sequence into an equation and graph it as a line. 8.F.2/3/4 on the board."
+    },
+    {
+     "m": 6,
+     "t": "Notes (slides 4–5)",
+     "d": "How the Rule Is Built: term n = 1 + 2 + … (n jumps) = 2 × n + 1 → y = 2x + 1. From Dots to a Line: x can be 0, −1 → connect."
+    },
+    {
+     "m": 8,
+     "t": "Example 1 — live",
+     "d": "5, 8, 11, 14, 17 → jump 3, term 0 = 2 → y = 3x + 2."
+    },
+    {
+     "m": 6,
+     "t": "You Try 1",
+     "d": "5, 7, 9, 11, 13 → y = 2x + 3."
+    },
+    {
+     "m": 8,
+     "t": "Example 2 — live",
+     "d": "Vertical table for y = 2x + 1: x = 1–4, then 0 and −1."
+    },
+    {
+     "m": 6,
+     "t": "You Try 2",
+     "d": "y = 3x − 1 table (row 1 modeled)."
+    },
+    {
+     "m": 14,
+     "t": "Assignment (slide 10)",
+     "d": "4 problems on paper, check in Desmos. P3 gets +2 min here."
+    },
+    {
+     "m": 3,
+     "t": "Close",
+     "d": "Tomorrow: what if the equation has a fraction?"
+    }
+   ],
+   "materials": [
+    "EN deck: https://docs.google.com/presentation/d/1gP7_m4Jeraj2imrD3EnWtYGSmkfxE42kHcf7_KFatIw/edit (owned by personal account — make a district copy before posting)",
+    "Vietnamese deck: https://docs.google.com/presentation/d/1-HQCLCMtQQcPOnys0hMIIe2Yc5i3TXA5EazMRpX1yEw/edit",
+    "Graph paper or Desmos"
+   ],
+   "answers": [
+    "Warm-up: (1,3)(2,5)(3,7)(4,9); before 3 → 1",
+    "Ex1: y = 3x + 2 · YT1: y = 2x + 3",
+    "Ex2: 3, 5, 7, 9, 1, −1 · YT2: 2, 5, 8, 11, −1, −4",
+    "Assign: y = 2x + 4 · −1, 3, 7, 11 · 4, 3, 2, 1, 0 · ★ y = −2x + 12"
+   ],
+   "watch": "Term 0 = the y-intercept (Lesson 2.6 callback). Classroom post for Monday not drafted yet.",
+   "type": "New Content"
+  },
+  "w9-tue-im1": {
+   "course": "IM1",
+   "title": "District IAB — testing day (no lesson)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "District interim assessment",
+   "goal": "Give the district IAB in P1 and P3. Lesson 4.3 Day 2 moved to Wednesday.",
+   "flow": [
+    {
+     "m": 59,
+     "t": "District IAB",
+     "d": "Testing all period. P3 has 61 min."
+    }
+   ],
+   "materials": [
+    "District IAB (proctor per district directions)"
+   ],
+   "answers": [],
+   "watch": "Tuesday Classtime (2 questions) moves to Thursday. No student data goes in planning files.",
+   "type": "Assessment"
+  },
+  "w9-wed-im1": {
+   "course": "IM1",
+   "title": "4.3 Graphing Linear Functions (Day 2) — Choosing Smart x-Values",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "Review Grade 8 F.3, F.4 + F-IF.5 (district 4.3, Reveal 4-1 Ex2 = y = ¼x + 3)",
+   "goal": "I can pick smart x-values to make a table and graph a line. Fraction → multiples of the bottom number. Story → x-values that make sense (count = dots, measure = line from 0).",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up (recap + keep skills alive)",
+     "d": "y = 2x + 3 for x = 0, 1, 2 · x − 7 = −3 · x ÷ 4 = 2, then ¼ of 8."
+    },
+    {
+     "m": 1,
+     "t": "Title + Goals",
+     "d": ""
+    },
+    {
+     "m": 5,
+     "t": "Notes (take notes)",
+     "d": "Rule 1: fraction → multiples of the bottom number. Rule 2: story → count = dots, measure = line from 0."
+    },
+    {
+     "m": 6,
+     "t": "Example 1 — live",
+     "d": "y = ¼x + 3 (district). Show x = 1 → 3.25 first, then x = −4, 0, 4, 8."
+    },
+    {
+     "m": 4,
+     "t": "You Try 1",
+     "d": "y = ³⁄₅x − 1, students pick multiples of 5."
+    },
+    {
+     "m": 6,
+     "t": "Example 2 — live",
+     "d": "Jake's pretzels, $2.50 each, y = 2.5x, x = 0, 2, 4, 6. Dots."
+    },
+    {
+     "m": 4,
+     "t": "You Try 2",
+     "d": "In-N-Out $15/hr, y = 15x, x = 0–4. Line from 0."
+    },
+    {
+     "m": 10,
+     "t": "Assignment",
+     "d": "y = ⁶⁄₅x + 5 · y = ⁴⁄₃x − 4 (they pick) · Jake 20 pretzels. P3 +3 min."
+    },
+    {
+     "m": 2,
+     "t": "Close / Exit",
+     "d": "y = ⅓x + 1: which x-values? Tomorrow: how steep is a line (4.4)."
+    }
+   ],
+   "materials": [
+    "Deck (EN/ES): https://docs.google.com/presentation/d/15wszqAvh4ukrs3zFuVOyWTwM_fJZVLSb9qosduPNhLc/edit",
+    "Deck (Vietnamese): https://docs.google.com/presentation/d/157JmlZ6Fdfpj0nzJX6QFxGMAvPHrq30XvKXmVaAjEE8/edit",
+    "Graph paper"
+   ],
+   "answers": [
+    "Warm-up 3, 5, 7 · x = 4 · x = 8 · ¼ of 8 = 2",
+    "Ex1 2, 3, 4, 5 · YT1 (x = −5, 0, 5) −4, −1, 2",
+    "Ex2 0, 5, 10, 15, dots · YT2 0, 15, 30, 45, 60, line from 0",
+    "Assign: −1, 5, 11 · (−3, 0, 3, 6) −8, −4, 0, 4 · $50, no, dots · ★ 75 pretzels $187.50",
+    "Exit: multiples of 3 (−3, 0, 3, 6)"
+   ],
+   "watch": "43-minute late start (P3 46). IAB took Tuesday, so this is Day 2. P3 had it Wed Sep 30. P1 did not get it Sep 30 and had it Thu Oct 1 (59 min: Classtime 5 + pretzel extra practice filled the time). Flat and vertical lines go to 4.4. Vietnamese deck needs a native-speaker skim.",
+   "type": "New Content"
+  },
+  "w9-thu-im1": {
+   "course": "IM1",
+   "title": "Unit 4 Showdown: review game (no new content), P3 only",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "Review 4.1–4.3 (no fractions)",
+   "goal": "Seated, teacher-paced, individual review game for Friday's quiz. Every student answers every question; the paper sheet is the grade.",
+   "flow": [
+    {
+     "m": 8,
+     "t": "Classtime (5)",
+     "d": "Answers B, B, A, B, C. Q1 uses ½x: bonus for P1."
+    },
+    {
+     "m": 2,
+     "t": "Rules",
+     "d": "Assigned seats, one Chromebook each, Showdown sheet out."
+    },
+    {
+     "m": 38,
+     "t": "Wayground live (teacher-paced)",
+     "d": "3 rounds of 5. After each round, 2 min on the most-missed question (Chain notes slide)."
+    },
+    {
+     "m": 8,
+     "t": "Boss Question",
+     "d": "Slide 5, alone, on the sheet: 7, 9, 11 → y = 2x + 5."
+    },
+    {
+     "m": 3,
+     "t": "Collect sheets",
+     "d": "Classwork grade. P3 +2 min."
+    }
+   ],
+   "materials": [
+    "Deck: https://docs.google.com/presentation/d/1QIfb6yGvEr2RMIah_zmpq_VWCQgasy6KYRi6nPknReo/edit",
+    "Showdown Work Sheet: https://docs.google.com/document/d/1AdxRI_Nd0R6aZpxMj5LDWTt91K3o2RtB7wWCjVpakWo/edit",
+    "Wayground (10-1-26) IM1 Unit 4 Showdown, 15 q with pictures: https://wayground.com/activity/admin/quiz/6abe7d2d3648ec8e61ba7980/edit"
+   ],
+   "answers": [
+    "Wayground: 13 · 3 · 1 · y = 2x · C · 21 · −3 · 3 · y = 4x + 3 · 48 · 3 · −4 · y = 2x + 1 · (3, 7) · Dots",
+    "Boss: 7, 9, 11, 13, 15 · jump 2 · term 0 = 5 · y = 2x + 5 · Fig 10 = 25 · dots"
+   ],
+   "watch": "Oct 1 swap: only P3 played (P1 did 4.3 Day 2 instead). P3 played Wayground the whole period, so the Boss Question was not used. The Wayground set is built and reusable for P1 later.",
+   "type": "Review — Game"
+  },
+  "w9-fri-im1": {
+   "course": "IM1",
+   "title": "Pixel Puzzle warm-up + Practice Quiz (quiz moved to Monday)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "Review 4.1–4.3",
+   "type": "Review",
+   "goal": "Students work the Practice Quiz (same 10 questions as the real quiz, different numbers). Extra credit if they finish it in class. The real quiz moved to Mon Oct 5.",
+   "flow": [
+    {
+     "m": 8,
+     "t": "Warm-Up: Pixel Puzzle",
+     "d": "Video-game picture equations. Mushroom 4, star 3, ? block 23, Boss 43, Bonus 11 (order of operations)."
+    },
+    {
+     "m": 49,
+     "t": "Practice Quiz",
+     "d": "Work time. Extra credit for finishing in class. P3 +2 min."
+    },
+    {
+     "m": 2,
+     "t": "Close",
+     "d": "Monday: the real quiz."
+    }
+   ],
+   "materials": [
+    "PRACTICE Quiz: https://docs.google.com/document/d/1opi5ww6RTZ_8XYJNBZlTluwoNmPwSTUGJn4lGZbXfNs/edit",
+    "Pixel Puzzle image (Claude sent it in chat; builder tools/slides/warmups/pixel_puzzle_4x.py)"
+   ],
+   "answers": [
+    "Pixel Puzzle: 🍄 = 4, ⭐ = 3, ? = 23, Boss = 4(10) + 3 = 43, Bonus = 23 − 4×3 = 11",
+    "Practice: 6, 10, 14, 18, 22 · adds 4 · Figure 0 = 2 · y = 4x + 2 · Fig 10 = 42 · dots · y = 2x + 2 at x = −2, −1, 0, 1 → −2, 0, 2, 4"
+   ],
+   "watch": "Mario's call Oct 2: the quiz moves to Monday so students have the practice first. Quiz files were renamed 'Final (10-2-26) …' in the Unit 4 folder."
+  },
+  "w10-mon-im1": {
+   "course": "IM1",
+   "title": "Unit 4 Quiz (4.1–4.3)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "Review 4.1–4.3",
+   "type": "Assessment",
+   "goal": "Ring Rush warm-up (Sonic-style; a light run of the quiz steps with new numbers), then the 20-point quiz. Version A = P1, Version B = P3. Counts in Quarter 1.",
+   "flow": [
+    {
+     "m": 3,
+     "t": "Settle",
+     "d": "Phones away."
+    },
+    {
+     "m": 10,
+     "t": "Warm-Up: Ring Rush (slide 1)",
+     "d": "4 starting rings + 2 per act: Act 4 = 12 · table 6, 8, 10, 12 · jump 2, Act 0 = 4, y = 2x + 4 · Act 10 = 24 · plot (1,6)…(4,12), dots."
+    },
+    {
+     "m": 0,
+     "t": "Erase the board",
+     "d": "Then slide 2: Quiz Time."
+    },
+    {
+     "m": 35,
+     "t": "Unit 4 Quiz",
+     "d": "10 questions × 2 pts. P3 +2 min."
+    },
+    {
+     "m": 11,
+     "t": "Finishers",
+     "d": "Turn it in, then MagicSchool room DizU3Q."
+    }
+   ],
+   "materials": [
+    "Quiz Day deck v2 (Ring Rush warm-up + Quiz Time): https://docs.google.com/presentation/d/1kcgq_xeUm7OMaeUkXukD40NneGastRYRrX6GOSyL_s8/edit",
+    "Final Quiz v4 Version A (P1): https://docs.google.com/document/d/11U1ItF9syaRhGTs-MaYXwu9W3XOFxO-WBHKyhYXOsPU/edit",
+    "Final Quiz v4 Version B (P3): https://docs.google.com/document/d/1rydU4t4dHb74lz6nd6bG300vzanqxBq_D4byjmbS-7g/edit",
+    "Answer key (teacher only): https://docs.google.com/document/d/1XEZrK_HqdEf-y4gpC2ZdpcaLSEu8d0eg42SB9BJiXWs/edit"
+   ],
+   "answers": [
+    "A (L-shape): 3, 5, 7, 9, 11 · adds 2 · Figure 0 = 1 · y = 2x + 1 · Fig 10 = 21 · dots · y = 3x − 1 at x = −1, 0, 1, 2 → −4, −1, 2, 5",
+    "B (T-shape): 4, 7, 10, 13, 16 · adds 3 · Figure 0 = 1 · y = 3x + 1 · Fig 10 = 31 · dots · y = 2x − 3 at x = −1, 0, 1, 2 → −5, −3, −1, 1",
+    "Ring Rush: Act 4 = 12 · 6, 8, 10, 12 · jump 2 · Act 0 = 4 · y = 2x + 4 · Act 10 = 24 · dots"
+   ],
+   "watch": "v2 (Oct 4): the Practice Quiz answers slide was replaced by the Ring Rush warm-up (Mario). Its pattern (y = 2x + 4) doesn't repeat any quiz numbers. Print A for P1 and B for P3 (the 'Final' files). Enter scores by Fri Oct 9 (Q1 ends)."
+  },
+  "w10-tue-im1": {
+   "course": "IM1",
+   "title": "4.4 Rate of Change & Slope (Day 1 of 2)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.6 · Review 8.F.4",
+   "type": "New Content",
+   "goal": "I can find the slope of a line from a table or a graph. Jump = rate of change = slope = m. District 4.4: slope triangles or change in y ÷ change in x, NOT the formula.",
+   "flow": [
+    {
+     "m": 7,
+     "t": "Warm-Up",
+     "d": "Quiz recap (4, 7, 10, 13 → y = 3x + 1) + taste: table counts by 2s."
+    },
+    {
+     "m": 2,
+     "t": "Title + Goals",
+     "d": ""
+    },
+    {
+     "m": 6,
+     "t": "Notes 1: the jump has a new name",
+     "d": "slope = change in y ÷ change in x. Table x by 2s: 6 ÷ 2 = 3."
+    },
+    {
+     "m": 6,
+     "t": "Example 1 (live): Leveling Up",
+     "d": "Minutes 0, 2, 4, 6 → coins 10, 40, 70, 100. 30 ÷ 2 = 15 coins per minute."
+    },
+    {
+     "m": 5,
+     "t": "You Try 1",
+     "d": "x 1, 3, 5, 7 → y 4, 10, 16, 22. Slope 3. Bonus slope −2."
+    },
+    {
+     "m": 6,
+     "t": "Notes 2: slope triangles",
+     "d": "Right first (run), then up + or down − (rise). Uphill +, downhill −."
+    },
+    {
+     "m": 7,
+     "t": "Example 2 (live): Worksheet #1",
+     "d": "A(−5, −2), B(−2, 0), C(4, 4): up 2 right 3 = 2/3, up 4 right 6 = 4/6 = 2/3. Same line, same slope."
+    },
+    {
+     "m": 6,
+     "t": "We Do: Worksheet #2",
+     "d": "L(1, 0) to M(3, 6): 6/2 = 3. J(−1, −6) to K(0, −3): 3/1 = 3."
+    },
+    {
+     "m": 12,
+     "t": "Assignment",
+     "d": "2-page Slope Triangles worksheet, PAGE 1 (front). Page 2 Thursday. P3 +2 min."
+    },
+    {
+     "m": 2,
+     "t": "Close",
+     "d": "Uphill is ___, downhill is ___."
+    }
+   ],
+   "materials": [
+    "Deck (EN/ES, 10 slides, answers in speaker notes): https://docs.google.com/presentation/d/1wAS5yUbI7Wlc3IoZoTGI_MWmoYGI3sFUc5eBS-iQVoQ/edit",
+    "Slope Triangles worksheet, 2-page copy (print, page 1 today, page 2 Thursday): https://docs.google.com/document/d/1y5Xwq1YWT2Q2t40N3z7oQKmVMuB1Eyx1OKPSFmGONos/edit"
+   ],
+   "answers": [
+    "Warm-up: jump 3, term 0 = 1, y = 3x + 1 · y goes up 6",
+    "Ex1: +2, +30, 15 coins per minute · YT1: 3 · bonus −2",
+    "Worksheet #1 (Ex 2): 2/3 and 4/6 = 2/3 · Worksheet #2 (We Do): 3 and 3 · Done early: 2, uphill"
+   ],
+   "watch": "District worksheet problems #1 and #2 moved onto slides 8–9 so the worksheet fits on 2 pages (Mario, Oct 2). Your copy is in Lesson 4.4; the district original is untouched. Skip the slope formula."
+  },
+  "w10-wed-im1": {
+   "course": "IM1",
+   "title": "Keep Skills Alive: quiz back + slope Wayground",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": false,
+   "standard": "F-IF.6 practice (Tuesday's skills only)",
+   "type": "Practice",
+   "goal": "Nothing new. Fix your top 2 quiz mistakes, then 10 slope questions on Wayground.",
+   "flow": [
+    {
+     "m": 14,
+     "t": "Quiz back: fix your top 2 (slide 1)",
+     "d": "A and B answers on the slide. Go over the most-missed question on the board."
+    },
+    {
+     "m": 25,
+     "t": "Wayground: (10-7-26) IM1 Slope Practice (slide 2)",
+     "d": "10 questions, 4 with graphs. Paper first. P3 +3 min."
+    },
+    {
+     "m": 4,
+     "t": "Exit (slide 3)",
+     "d": "Uphill = positive · change in y ÷ change in x."
+    }
+   ],
+   "materials": [
+    "Deck (3 slides): https://docs.google.com/presentation/d/1THyRsdIl8dFgktg0dp84KEVlo2zCziwJXTrIgCr6g1M/edit",
+    "Wayground (not published yet): https://wayground.com/activity/admin/quiz/6ac0276d5b8b961dfdda24f4/edit",
+    "Monday's graded quizzes"
+   ],
+   "answers": [
+    "Wayground: 3 · 4 · −3 · 2 · −1 · 2 · −2 · 2 · 15 · 3",
+    "Exit: positive · y, x"
+   ],
+   "watch": "43-minute late start. Publish the Wayground and start it Live (joinmyquiz.com) before class."
+  },
+  "w10-thu-im1": {
+   "course": "IM1",
+   "title": "Practice + Graphing Quiz (one at a time, Day 1 of 2)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.7a, F-IF.6",
+   "type": "Practice + Assessment",
+   "goal": "Changed Oct 8 (Mario): warm-up, then students practice while Mario gives a verbal graphing quiz one at a time (random y = mx + b from Gemini). Continues Friday. Q1 grades due Friday.",
+   "flow": [
+    {
+     "m": 8,
+     "t": "Warm-Up: Zombie Defense (slide 1)",
+     "d": "y = 2x − 3: m, b, graph, which zombie it hits."
+    },
+    {
+     "m": 3,
+     "t": "Explain practice + quiz (slides 2–3)",
+     "d": "3 rounds of practice. Ready? Name on the board. Show how the quiz works."
+    },
+    {
+     "m": 46,
+     "t": "Practice while you quiz",
+     "d": "Round 1: graphing worksheet #1–5, #7 · Round 2: zombie sheet front · Round 3: zombie sheet back (partners). Quiz students one at a time, 2 equations each, about 2–3 min. P3 +2."
+    },
+    {
+     "m": 2,
+     "t": "Close",
+     "d": "Collect quiz slips. Not quizzed yet = first tomorrow."
+    }
+   ],
+   "materials": [
+    "Deck (3 slides): https://docs.google.com/presentation/d/1lWn9xfzU7vBnyGAGjh-Fr4G9J8TyGSPiSZN37byH-8E/edit",
+    "PRINT quiz slips, 2 per page (cut): https://docs.google.com/document/d/1VdgeVFJWoos6NzGTgxFV9q9MepWdTJ-FUO2IHf0koI4/edit",
+    "PRINT Round 1 worksheet: https://docs.google.com/document/d/1pRKH5I-wFHs9qSnIfkJsr3Z7oEyC4T1EaVetujYxA-0/edit",
+    "PRINT zombie sheet = packet pages 4 and 5 only, front/back: https://drive.google.com/file/d/1FKshjai9HK97aHcX9ahkBAXsFHwzPBxP/view",
+    "Gemini equation generator on YOUR laptop (not the projector)"
+   ],
+   "answers": [
+    "Warm-up: m 2, b −3 · up 2 right 1 · hits B: 2(3) − 3 = 3 · Star: −(−2) + 2 = 4, yes A",
+    "Zombie front, write the equation: y = −x + 3 · y = −4/3x − 1 · y = 2x − 4 · Zombie back key = packet p10",
+    "Quiz score per line (5): says m 1 · says b 1 · plots b 1 · slope + line 2. Two lines = 10."
+   ],
+   "watch": "Grades due Fri Oct 9 (Q1 ends). Enter quiz scores at the end of each day. Anyone not quizzed by Friday quizzes Monday (counts in Q2)."
+  },
+  "w10-fri-im1": {
+   "course": "IM1",
+   "title": "Friday To-Do List: late work, graphing quiz, One-Step Quest",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.7a · Review one-step equations",
+   "type": "Assessment + Practice",
+   "goal": "Q1 ends, grades due. Slide 4 stays up all period. Students work down the list while Mario finishes the one-at-a-time graphing quiz.",
+   "flow": [
+    {
+     "m": 3,
+     "t": "Slide 4 up",
+     "d": "Work down the list. Not quizzed? Name on the board."
+    },
+    {
+     "m": 53,
+     "t": "Quiz one at a time; everyone else works the list",
+     "d": "1 late work first · 2 graphing quiz (practice zombie sheet while waiting) · 3 One-Step Quest · 4 y = mx + b practice sheet if the game won't load. P3 +2."
+    },
+    {
+     "m": 3,
+     "t": "Close",
+     "d": "Collect quiz slips and practice papers. Enter scores before you leave."
+    }
+   ],
+   "materials": [
+    "Deck, slide 4 = Friday To-Do List (editable): https://docs.google.com/presentation/d/1lWn9xfzU7vBnyGAGjh-Fr4G9J8TyGSPiSZN37byH-8E/edit",
+    "Leftover quiz slips",
+    "Gemini equation generator on your laptop",
+    "One-Step Quest student link (test on a Chromebook before 8:45; backup Slope Skatepark)",
+    "About 15 copies of the y = mx + b practice sheet: https://docs.google.com/document/d/1PzJF7DD5Wa-fGTFZJLll8sVMbNopIysLxsmoFqSa-Ac/edit"
+   ],
+   "answers": [
+    "Quiz score per line (5): m 1 · b 1 · plot b 1 · slope + line 2.",
+    "Practice sheet: 1) y = 2x 2) y = −3x + 5 3) y = x + 1 4) y = −2x + 4 5) y = ½x − 1 6) y = −⅔x + 3 (start at b, then the slope)"
+   ],
+   "watch": "Q1 grades due today: enter the graphing quiz and Monday's quiz. Don't teach new content while quizzing. Mon Oct 12: no school for students."
+  },
+  "w10-mon-fa": {
+   "course": "FA",
+   "title": "Lesson 3.6 Simple Interest",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "New Content",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Calculate simple interest (I = Prt) and the new balance (A = P + I), convert months to years, and explain why simple interest is a straight line (y = mx + b).",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up",
+     "d": "% → decimal (3%, 4.5%, 0.5%, 12%); what m and b meant in the Story Game savings equation."
+    },
+    {
+     "m": 3,
+     "t": "Title + Goals",
+     "d": "LT: I can calculate simple interest and the new balance, and explain why simple interest grows in a straight line. EQ: How does a bank pay you for saving?"
+    },
+    {
+     "m": 10,
+     "t": "Notes (Take Notes)",
+     "d": "P, r, t, I, A table; I = P × r × t; A = P + I; t = months ÷ 12 (3 → 0.25, 6 → 0.5, 9 → 0.75, 18 → 1.5, 30 → 2.5)."
+    },
+    {
+     "m": 6,
+     "t": "Example 1 (I do)",
+     "d": "$500 at 3% for 2 yr."
+    },
+    {
+     "m": 5,
+     "t": "Concept Check 1",
+     "d": "$1,000 at 4% for 3 yr."
+    },
+    {
+     "m": 8,
+     "t": "Example 2 (I do)",
+     "d": "$1,200 at 2.5% for 18 months, then the line y = 30x + 1,200 (table 0–3 yrs)."
+    },
+    {
+     "m": 5,
+     "t": "Concept Check 2",
+     "d": "$2,400 at 3.5% for 9 months."
+    },
+    {
+     "m": 17,
+     "t": "Assignment (2 slides)",
+     "d": "6 problems in their own copy: basic, months, grad night / age 30 / age 65, find r, write y = mx + b."
+    }
+   ],
+   "materials": [
+    "EN-ES deck: https://docs.google.com/presentation/d/1ItUx1PPU_ijMGKqhYolFci_eVCx1mFFFWmxqQ3COWpI/edit",
+    "Chinese deck: https://docs.google.com/presentation/d/1rezV1MV2XBJ7R_9LdkU5Z99ypC6Jhy21fZ72YEVxXtA/edit",
+    "Calculators"
+   ],
+   "answers": "WU 0.03 · 0.045 · 0.005 · 0.12. Ex1 $30 / $530. CC1 $120 / $1,120. Ex2 t = 1.5, $45 / $1,245, y = 30x + 1,200. CC2 t = 0.75, $63 / $2,463. Assign: 1) $160/$960 2) $150/$2,650 3) $26.25/$1,526.25 4) $681.20 · $868.40 · $1,414.40 5) 3% 6) y = 60x + 2,000, $2,600.",
+   "watch": "Taught as the Bank Quest game (Apps Script web app): all 11 levels mirror the 3.6 deck, ending in a per-student Boss Round + Bank Receipt in notebooks.",
+   "source": "Mario's Consumer Math Lesson 5.4 Simple Interest (Practice 1 & 2 adapted); district FA outline Unit 3 (linear + exponential)."
+  },
+  "w10-tue-fa": {
+   "course": "FA",
+   "title": "Bank Quest Check-In + Lesson 3.7 Compound Interest: Day 1 (by hand)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "New Content",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Find compound interest period by period (annual, quarterly, semiannual) and compare it to simple interest.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up",
+     "d": "Compound-interest skills: 6% and 2.5% as decimals; $1,200 × 0.05; round $52.0249 and $41.616 to cents; 8% ÷ 4; $500 + $30 interest, then 6% of the new balance."
+    },
+    {
+     "m": 4,
+     "t": "Check-In 1: The Formulas",
+     "d": "From memory on paper: copy I = P × r × t, A = P + I, t = months ÷ 12, and fill in what P, r, t, I, A mean."
+    },
+    {
+     "m": 4,
+     "t": "Check-In 2: Practice",
+     "d": "4 problems, silent: 15 months to years; $600 at 4% for 2 yr; $900 at 3% for 6 months; meaning of 18 and 600 in y = 18x + 600."
+    },
+    {
+     "m": 2,
+     "t": "Check-In 3: Check your answers",
+     "d": "Hands up 4/4, 3/4. If many missed #1 or #3, re-show t = months ÷ 12 (3 min). Bridge question: interest on interest?"
+    },
+    {
+     "m": 2,
+     "t": "Title + Goals",
+     "d": "LT: I can find compound interest by adding each period's interest to the balance."
+    },
+    {
+     "m": 8,
+     "t": "Notes (Take Notes)",
+     "d": "Compound definition; Interest = Balance × rate per period; n table (1/2/4/12); rate per period = r ÷ n."
+    },
+    {
+     "m": 6,
+     "t": "Example 1",
+     "d": "$1,000 at 10% annually, 3 yr table vs simple $1,300."
+    },
+    {
+     "m": 4,
+     "t": "Concept Check 1",
+     "d": "$500 at 6% annually, 3 yr."
+    },
+    {
+     "m": 7,
+     "t": "Example 2",
+     "d": "$2,500 at 8% quarterly, 1 yr (2% per quarter)."
+    },
+    {
+     "m": 4,
+     "t": "Concept Check 2",
+     "d": "$1,000 at 4% semiannually, 1 yr."
+    },
+    {
+     "m": 13,
+     "t": "Assignment (2 slides)",
+     "d": "4 fill-in tables: annual ×2, quarterly, semiannual. Unfinished = homework."
+    }
+   ],
+   "materials": [
+    "EN-ES deck: https://docs.google.com/presentation/d/1UNrJJtfRUR4c8u-PVKdG0H4F43QQ0vX1Qq5ek8O_Fcg/edit",
+    "Chinese deck: https://docs.google.com/presentation/d/1UCaqrSMrTi5ldwADtDYZurUno8NhP-ja_-ym4rTR6f0/edit",
+    "Calculators"
+   ],
+   "answers": "WARM-UP: 0.06 · 0.025 · $60 · $52.02 · $41.62 · 2% = 0.02 · $530, then 530 × 0.06 = $31.80. CHECK-IN: P = money you start with · r = % per year as a decimal · t = years · I = money the bank pays you · A = P + I. Practice: 1) 1.25 2) I $48, A $648 3) t 0.5, I $13.50, A $913.50 4) 18 = interest each year, 600 = starting money. LESSON: Ex1 1,100 → 1,210 → $1,331 (+$31 vs simple). CC1 $595.51. Ex2 2,550 → 2,601 → 2,653.02 → $2,706.08. CC2 $1,040.40. Assign: $2,315.25 · $585.64 · $1,125.51 · $3,376.53 (±$0.01).",
+   "watch": "Mon 10/5 3.6 was taught through Bank Quest, so the first 10 minutes check what stuck (Mario's request). Check the Bank Quest Class Vault before class for how many reached the Boss Round. No formula A = P(1 + r/n)^(nt) until Thursday.",
+   "source": "Mario's Consumer Math Lesson 5.5 Compound Interest (A/B)."
+  },
+  "w10-wed-fa": {
+   "course": "FA",
+   "title": "Late Start — SMG Check-In + The Power of Compounding",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "District routine + Applied Practice",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Stock Market Game check-in (live cycle), then use a compound-interest calculator to see how rate and TIME change long-term savings.",
+   "flow": [
+    {
+     "m": 3,
+     "t": "Settle + agenda",
+     "d": "No warm-up; Chromebooks out."
+    },
+    {
+     "m": 17,
+     "t": "SMG check-in",
+     "d": "Team login, portfolio value, ≥1 buy/sell/hold decision (≥10 shares, no stocks < $3), 2-sentence team note."
+    },
+    {
+     "m": 20,
+     "t": "Power of Compounding",
+     "d": "Investor.gov calculator: Raul (1.5%, 40 yr), Pamela (7%, 40 yr), Isaiah ($500/mo, 15 yr); questions A–B."
+    },
+    {
+     "m": 3,
+     "t": "Exit",
+     "d": "Start saving at 15 vs 25 — who ends with more, and about how much?"
+    }
+   ],
+   "materials": [
+    "Deck: https://docs.google.com/presentation/d/1_5FIwiT9ZWfbWgYJm61Y29gJiUfoMK3FLWF3BiZWGuA/edit",
+    "Chromebooks",
+    "SMG team logins"
+   ],
+   "answers": "Put in: Raul & Pamela $48,100, Isaiah $90,500. Calculator totals ≈ Raul $65–66k · Pamela $241–258k · Isaiah $152–163k (accept what the calculator shows). A) higher rate. B) more years to compound. Exit: start at 15 ≈ double start at 25.",
+   "watch": "43-minute late start. If Investor.gov is blocked, project it and run it together. SMG rules from the Fall 2026 launch record.",
+   "source": "Mario's Consumer Math 5.5 'Interactive: The Power of Compounding' (NGPF); SMG Fall 2026 launch record."
+  },
+  "w10-thu-fa": {
+   "course": "FA",
+   "title": "Finish the game + Wayground: Simple vs Compound practice (formula lesson moved to Fri)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Practice",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Practice simple vs compound interest by table. The formula A = P(1 + r/n)^(nt) was NOT taught yet; it moves to Friday.",
+   "flow": [
+    {
+     "m": 30,
+     "t": "Finish the game",
+     "d": "Students finished the game from Wednesday."
+    },
+    {
+     "m": 29,
+     "t": "Wayground",
+     "d": "FA Simple vs Compound Interest Practice (host with timer off)."
+    }
+   ],
+   "materials": [
+    "Wayground: FA Simple vs Compound Interest Practice"
+   ],
+   "answers": "In Wayground.",
+   "watch": "What actually happened Thu 10/8. Quiz moved to Tue 10/13 (no school Mon 10/12) so the formula gets a teaching day first.",
+   "source": "Mario's Consumer Math Lessons 5.5–5.6 (formula replaces the table method); colleague FA Unit 3 Lesson 6 Simple vs Compound (read-only)."
+  },
+  "w10-fri-fa": {
+   "course": "FA",
+   "title": "Lesson 3.7 Day 2: Compound Interest, The Shortcut Formula",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "New Content",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "LT: I can find a compound interest balance with a table AND with A = P(1 + r/n)^(nt), and tell when to use simple vs compound. EQ: How can one line of math replace a whole table?",
+   "flow": [
+    {
+     "m": 8,
+     "t": "Warm-Up: Same Money, Two Ways",
+     "d": "$2,000 at 5% for 4 years: simple table vs compound table side by side. How much more does compound earn?"
+    },
+    {
+     "m": 2,
+     "t": "Title + Goals",
+     "d": "Hook: what if there are 40 rows?"
+    },
+    {
+     "m": 6,
+     "t": "Example 1 (I do): The Long Way",
+     "d": "$4,000 at 6% compounded semiannually, 2 years: 6% ÷ 2 = 3% per row, 2 × 2 = 4 rows."
+    },
+    {
+     "m": 5,
+     "t": "Meet the Formula (Take Notes)",
+     "d": "A = P(1 + r/n)^(nt) dead center, arrows to each letter, n chart (1, 2, 4, 12)."
+    },
+    {
+     "m": 2,
+     "t": "Why \"1 +\"? (optional)",
+     "d": "4,000 + 4,000 × 0.03 = 4,000 × 1.03. Keep all your money (1) plus earn 3%. Four rows = (1.03)^4. Skip if P2 is restless."
+    },
+    {
+     "m": 5,
+     "t": "Example 1 Again (I do): The Shortcut",
+     "d": "4,000(1 + 0.06 ÷ 2)^(2 × 2) = same answer as the table. Calculator: 4000 × (1 + 0.06 ÷ 2) ^ (2 × 2)."
+    },
+    {
+     "m": 6,
+     "t": "You Do: Name the Parts (new slide 8)",
+     "d": "$2,500 at 4% quarterly for 3 years: students fill in P, r, n, t, then find A and the interest."
+    },
+    {
+     "m": 3,
+     "t": "Summary: Two Ways, Same Answer",
+     "d": "Few rows: either way. Many rows: formula. Interest = A minus P."
+    },
+    {
+     "m": 6,
+     "t": "Concept Check (partners)",
+     "d": "$1,200 at 4% quarterly for 1 year: one partner does the table, one does the formula. Do they match?"
+    },
+    {
+     "m": 3,
+     "t": "Test Tips: Which Formula? (marked IMPORTANT, quiz strategy)",
+     "d": "Simple: I = Prt then A = P + I. Compounded: A = P(1 + r/n)^(nt). Find n from the word. % to decimal. Parentheses. Round at the end. Interest or balance?"
+    },
+    {
+     "m": 9,
+     "t": "Practice (slides 12-13, mixed)",
+     "d": "5 problems: 1 simple, 3 compound (annual, quarterly, monthly), 1 simple vs compound. Formula card on each practice slide; no speaker notes (answers below)."
+    },
+    {
+     "m": 3,
+     "t": "Done? Keep practicing",
+     "d": "Slide 14. Wayground: FA Simple vs Compound Interest Practice (formula card on the slide). Remind: quiz Tuesday 10/13 (no school Monday), calculator OK, formulas given."
+    }
+   ],
+   "materials": [
+    "EN-ES deck (14 slides): https://docs.google.com/presentation/d/1DnhDygnksi22qscfSVpnYpjpRpMVn4XtZGDLl_09Ug0/edit",
+    "Chinese deck (14 slides): https://docs.google.com/presentation/d/1NUoUb6y7hJ1DCARH9b-vbCcD6a_87DvNIhYRRETvp2Y/edit",
+    "Calculators",
+    "Wayground: FA Simple vs Compound Interest Practice (publish first, timer off)"
+   ],
+   "answers": "WU simple 2,100 · 2,200 · 2,300 · $2,400; compound 2,100 · 2,205 · 2,315.25 · $2,431.01; difference $31.01. Ex 1 table 4,120.00 · 4,243.60 · 4,370.91 · $4,502.04; formula 4,000(1.03)^4 = $4,502.04. You Do: P 2,500 · r 0.04 · n 4 · t 3 → 2,500(1.01)^12 = $2,817.06, interest $317.06. CC 1,212.00 · 1,224.12 · 1,236.36 · $1,248.72 = 1,200(1.01)^4. Practice: 1) $672 2) $926.10 3) $2,122.73 4) $3,381.48 5) simple $1,400 vs compound $1,469.33, difference $69.33.",
+   "watch": "P2 on a Friday: no teaching chunk over 5 min; slides 4, 7, 9 have students writing. Most common error: missing parentheses around (1 + r/n) or (n × t). Q1 ends today.",
+   "source": "Mario's Consumer Math Lessons 5.5 and 5.6 (formula replaces the table method); district FA outline Unit 3 (linear vs exponential). Rebuilt Oct 8 from Mario's outline."
+  },
+  "w11-tue-fa": {
+   "course": "FA",
+   "title": "Warm-Up Review + Unit 3 Interest Quiz (Google Form)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Quiz",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Show simple and compound interest skills on a 20-point quiz (10 × 2).",
+   "flow": [
+    {
+     "m": 10,
+     "t": "Warm-up review (paper)",
+     "d": "3 problems like the quiz: simple, compound annually, compound quarterly. Answers slide next."
+    },
+    {
+     "m": 35,
+     "t": "Unit 3 Interest Quiz (Google Form)",
+     "d": "10 multiple choice × 2 pts, self-grading. Calculator OK, formulas in the form, notes away, scratch paper."
+    },
+    {
+     "m": 14,
+     "t": "Early finishers",
+     "d": "Create Your Savings Goals Part I (sort 10+ goals). Keep it for Wednesday."
+    }
+   ],
+   "materials": [
+    "EN-ES deck: https://docs.google.com/presentation/d/1qlX6Sfeqf9ooTckZvD-3YvlCfnxdMl2ua8hXiGvfWlw/edit",
+    "Chinese deck: https://docs.google.com/presentation/d/13SoYCLgQ2YHyizSgMSy5QVfee1wyxfL82N_vLUotX9w/edit",
+    "Google Form quiz: built by Assessments/FA_Unit3_Interest_Quiz_FORM_BUILDER.gs (district account)",
+    "KEY: https://docs.google.com/document/d/16_lDzrFUG0iU7NLrfqP1f--bUaEDM9wm9pa4q1sruTs/edit",
+    "Calculators / Desmos scientific"
+   ],
+   "answers": "WU 1) I $96, A $896 2) $1,622.40 3) $2,164.86. QUIZ 1) $150 2) $1,150 3) y = 50x + 1,000 4) $50 interest each year 5) $1,050 6) $1,102.50 7) $1,157.63 8) $1,050.95 9) $7.63 10) compound: interest on interest.",
+   "watch": "No school Mon 10/12. GoGuardian: lock to the Form + desmos.com/scientific. Form settings: release score immediately; show missed questions + points, NOT correct answers (P2 → P4). No Classtime in FA. Q2 grade.",
+   "source": "Week 10 FA decks; Consumer Math Ch 5 'Create Your Savings Goals' (NGPF)."
+  },
+  "w11-tue-im1": {
+   "course": "IM1",
+   "title": "4.4 Day 2: Four Kinds of Slope (short) + finish graphing quizzes",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.6",
+   "type": "New Content + Practice",
+   "goal": "Short lesson (flat = 0, straight up = undefined, uphill +, downhill −), then practice while Mario finishes the one-at-a-time graphing quiz.",
+   "flow": [
+    {
+     "m": 7,
+     "t": "Warm-Up (slide 1)",
+     "d": "Slope from a table, from 2 points, predict a flat line."
+    },
+    {
+     "m": 2,
+     "t": "Title + Goals (2–3)",
+     "d": ""
+    },
+    {
+     "m": 7,
+     "t": "Notes: four kinds (4)",
+     "d": "Uphill +, downhill −, flat 0, straight up undefined."
+    },
+    {
+     "m": 6,
+     "t": "Example 1 (5)",
+     "d": "Flat: 0. Straight up: undefined."
+    },
+    {
+     "m": 4,
+     "t": "You Try 1 (6)",
+     "d": "A undefined · B positive · C zero · D negative"
+    },
+    {
+     "m": 31,
+     "t": "Slide 7 To-Do: practice + quiz",
+     "d": "Worksheet page 2 → zombie sheet → name on board for quiz → y = mx + b sheet. SKIP slides 8–11 (Thursday). P3 +2."
+    },
+    {
+     "m": 2,
+     "t": "Close",
+     "d": "Collect quiz slips."
+    }
+   ],
+   "materials": [
+    "Deck (slides 1–7; skip 8–11): https://docs.google.com/presentation/d/1ImfP0r91huGt-_chGbH60D5VTXuUc4AyCLCmnJ7qX7Y/edit",
+    "Slope Triangles worksheet page 2 (already printed Oct 6): https://docs.google.com/document/d/1y5Xwq1YWT2Q2t40N3z7oQKmVMuB1Eyx1OKPSFmGONos/edit",
+    "Zombie sheet leftovers (packet p4–5): https://drive.google.com/file/d/1FKshjai9HK97aHcX9ahkBAXsFHwzPBxP/view",
+    "y = mx + b practice sheet (Friday copies): https://docs.google.com/document/d/1PzJF7DD5Wa-fGTFZJLll8sVMbNopIysLxsmoFqSa-Ac/edit",
+    "Quiz slips + Gemini generator"
+   ],
+   "answers": [
+    "Warm-up: 3 · 2 · 0",
+    "Ex1: 0, undefined · YT1: undefined, positive, zero, negative",
+    "Quiz per line: m 1 · b 1 · plot b 1 · slope + line 2"
+   ],
+   "watch": "Many students still need graphing practice: pull them during work time. Mon 10/12 no school."
+  },
+  "w11-wed-im1": {
+   "course": "IM1",
+   "title": "4.5 Day 2: Slope = Tilt, b = Up/Down + Match My Line (Amplify)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.6, F-IF.7a",
+   "type": "New Content",
+   "goal": "m tilts the line (positive, negative, zero, undefined; bigger m = steeper). b moves it up or down, same tilt. Then write equations from graphs in Match My Line.",
+   "flow": [
+    {
+     "m": 7,
+     "t": "Warm-Up (slide 1)",
+     "d": "Which way does it tilt? A to D slope words, steeper line, y = 2x + 1 vs y = 2x − 3"
+    },
+    {
+     "m": 6,
+     "t": "Notes (slide 2)",
+     "d": "y = mx + b: two jobs. m = tilt (4 slope pictures), b = up or down"
+    },
+    {
+     "m": 25,
+     "t": "Match My Line (slide 3)",
+     "d": "Amplify, 10 screens, Chromebooks. P3 28 min. Done? practice sheet"
+    },
+    {
+     "m": 3,
+     "t": "Close",
+     "d": "What did you change to fix the tilt? To move it up or down? Write, then share"
+    },
+    {
+     "m": 2,
+     "t": "Transitions",
+     "d": ""
+    }
+   ],
+   "materials": [
+    "Teacher deck (3 slides, answers in notes): https://docs.google.com/presentation/d/1xjigeo-aNHxRre6Oq4ckJCIIM6pCt5fplkRjfv2qnAA/edit",
+    "Student deck (no notes, OK to share): https://docs.google.com/presentation/d/1_FM-rhTHLyitKCC7IpmLCkj1XRX93kHq_28hU87bfus/edit",
+    "Match My Line (Amplify, from the district pacing doc 4.5 teacher resources): https://classroom.amplify.com/activity/687070588dc697996e8ab163  (log in, Copy and edit or Assign, code on the board)",
+    "Practice sheet for finishers: https://docs.google.com/document/d/1lboEd7WazP5dt47QPqkJOkkeO_bKLL2TkUccTfZYs8A/edit",
+    "Chromebooks"
+   ],
+   "answers": [
+    "Warm-up: 1) A negative, B zero, C positive, D undefined · 2) y = 3x is steeper · 3) Same m = 2 (same tilt); different b (crosses at 1 vs −3)"
+   ],
+   "watch": "Changed Oct 14 by Mario: slope as tilt visual + Match My Line replaces the graph/table examples. Table examples not taught today. Preview Match My Line screens 8 to 10 (may go past slope-intercept)."
+  },
+  "w11-thu-im1": {
+   "course": "IM1",
+   "title": "Classtime Review (22-min drill + rally day)",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.6, F-IF.7a review",
+   "type": "Review",
+   "goal": "Oct 15 is the Great ShakeOut drill + Homecoming rally: 22-minute periods (P1 8:45–9:07, P3 10:41–11:03). No new lesson. One Classtime set on this week's skills.",
+   "flow": [
+    {
+     "m": 2,
+     "t": "Chromebooks out, join Classtime",
+     "d": "Code on the board."
+    },
+    {
+     "m": 12,
+     "t": "Classtime: 8 questions",
+     "d": "Slope from a table · flat and straight-up lines · m and b · equation from a graph description and a table."
+    },
+    {
+     "m": 6,
+     "t": "Go over the 2 most-missed",
+     "d": "On the board, students fix on paper."
+    },
+    {
+     "m": 2,
+     "t": "Close",
+     "d": "Not done with Wednesday's practice sheet? Finish it for Friday."
+    }
+   ],
+   "materials": [
+    "Classtime session with the 8 questions (enter before class; list in the answers below and in the Lesson 4.5 folder)",
+    "Chromebooks",
+    "Wednesday's practice sheet for early finishers: https://docs.google.com/document/d/1lboEd7WazP5dt47QPqkJOkkeO_bKLL2TkUccTfZYs8A/edit"
+   ],
+   "answers": [
+    "1) x: 0, 1, 2, 3 and y: 5, 7, 9, 11. What is the slope?  Answer: 2  (choices: 2 · 5 · 7 · ½)",
+    "2) A flat line has a slope of:  Answer: 0  (choices: 1 · 0 · undefined · −1)",
+    "3) A straight-up line has a slope of:  Answer: undefined  (choices: 0 · 1 · undefined · −1)",
+    "4) y = −3x + 4. What are m and b?  Answer: m = −3, b = 4  (choices: m = −3, b = 4 · m = 4, b = −3 · m = 3, b = 4 · m = −3, b = −4)",
+    "5) Which line goes downhill?  Answer: y = −x + 5  (choices: y = 2x + 1 · y = −x + 5 · y = 3x · y = ½x − 2)",
+    "6) A line crosses the y-axis at 2. It goes up 3, right 1. What is the equation?  Answer: y = 3x + 2  (choices: y = 3x + 2 · y = 2x + 3 · y = ⅓x + 2 · y = 3x − 2)",
+    "7) y = 2x + 1 and y = 2x − 4. What is the same about the two lines?  Answer: same slope (same tilt)  (choices: same slope · same y-intercept · they are the same line · nothing)",
+    "8) To graph y = 2x − 5, where do you start?  Answer: (0, −5)  (choices: (0, −5) · (2, 0) · (−5, 0) · (0, 2))"
+   ],
+   "watch": "Counts toward the monthly Classtime requirement (8 questions). Friday has NO Classtime now. Q7 swapped Oct 14 (tables were moved to Friday): now same slope, different b, matching Wednesday's notes."
+  },
+  "w11-fri-im1": {
+   "course": "IM1",
+   "title": "4.5 Day 3: Write the Equation from a Story and Two Points",
+   "unit": "Unit 4 — Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.6, F-LE.2",
+   "type": "New Content",
+   "goal": "Moved from Thursday (short day). Story: rate = m, start = b. Two points: slope, then solve for b (a one-step equation). Linear or not. No Classtime today.",
+   "flow": [
+    {
+     "m": 7,
+     "t": "Warm-Up",
+     "d": "Table with no x = 0: y = 3x + 5"
+    },
+    {
+     "m": 2,
+     "t": "Goals",
+     "d": ""
+    },
+    {
+     "m": 6,
+     "t": "Notes 1: story words",
+     "d": "per/each/every = m; fee/up front/start = b. Costco y = 5x."
+    },
+    {
+     "m": 5,
+     "t": "Example 1",
+     "d": "Gym $20 + $12/month: y = 12x + 20"
+    },
+    {
+     "m": 4,
+     "t": "You Try 1",
+     "d": "$8 per lawn + $10: y = 8x + 10"
+    },
+    {
+     "m": 6,
+     "t": "Notes 2: two points",
+     "d": "Slope, plug in a point, solve for b."
+    },
+    {
+     "m": 6,
+     "t": "Example 2",
+     "d": "(1, 5), (3, 11): y = 3x + 2"
+    },
+    {
+     "m": 5,
+     "t": "You Try 2",
+     "d": "(2, 1), (5, 13): y = 4x − 7"
+    },
+    {
+     "m": 5,
+     "t": "Linear or not?",
+     "d": "A linear (+3), B not."
+    },
+    {
+     "m": 13,
+     "t": "Practice sheet",
+     "d": "3 stories + 3 point pairs. P3 +2."
+    }
+   ],
+   "materials": [
+    "Deck (10 slides, editable, answers in notes): https://docs.google.com/presentation/d/1bCi0S_fGsgjQpw4o_51drVlMOuLukyG99-eae8w1IfI/edit",
+    "PRINT practice sheet (1 page): https://docs.google.com/document/d/1Y_VSr66Bv2xxE2tSqShYTnlN5RNOWco61BSWtFTTpQ4/edit"
+   ],
+   "answers": [
+    "Sheet: 1) y = 30x + 50 · 2) y = −2x + 20 · 3) y = 5x + 15 · 4) y = 4x + 3 · 5) y = 2x · 6) y = −2x + 13"
+   ],
+   "watch": "SUB DAY (Mario absent Fri 10/16). Chromebook only, no instruction: Marbleslides: Lines (Amplify) https://classroom.amplify.com/activity/566b31734e38e1e21a10aac8 . Mario assigns it from his Amplify login. The graph/table + story deck is NOT taught Friday: it moves to the next day he is back (decide Week 12). Changed Oct 14: the graph and table slides from Wednesday (old warm-up, notes, Example 1 graph, Example 2 table, You Trys, practice sheet) were moved to the FRONT of Friday's deck. Friday deck is now 18 slides: too long for 59 min. Trim before Friday: the graph part was practiced in Match My Line. Monday is the Practice Test. Unit 4 Test Thu 10/22."
+  },
+  "w11-wed-fa": {
+   "course": "FA",
+   "title": "Late Start: SMG Check-In + Lesson 3.8 Create Your Savings Goals",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "District routine + New Content",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "LT: I can sort savings goals by time and figure out how much to save each month, week, and day. EQ: How do you turn a big goal into a small daily number?",
+   "flow": [
+    {
+     "m": 20,
+     "t": "SMG check-in",
+     "d": "Team login, portfolio value, one buy/sell/hold decision (≥10 shares, no stocks < $3), 2-sentence team note, then research ONE new company in a different industry (name, ticker, price, what it sells). Sets up Journal #2."
+    },
+    {
+     "m": 1,
+     "t": "Title + Goals",
+     "d": ""
+    },
+    {
+     "m": 8,
+     "t": "Part I: Sort your goals",
+     "d": "Brainstorm 15-20 ideas, sort short (< 2 months) / medium (2 months - 3 years) / long (3+ years); star the most motivating. Done early: split $100/month between the 3 starred goals."
+    },
+    {
+     "m": 4,
+     "t": "Example (I do): Sanjana's computer",
+     "d": "$400 in 9 months: $44.44/month, $11.11/week, $1.59/day."
+    },
+    {
+     "m": 8,
+     "t": "You Do: Your goal",
+     "d": "Cost, months, per month/week/day, 3 ways to save. Not done? Finish Friday in project time. Keep it: Part 2 of the project."
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "Why break a big goal into a monthly/weekly/daily amount?"
+    }
+   ],
+   "materials": [
+    "Lesson 3.8 folder (district): https://drive.google.com/drive/folders/1rWnY-nif58HRR2ayEnLjq41UV4j9onNo",
+    "Teacher EN-ES deck (with notes): https://docs.google.com/presentation/d/1l3EGAPV6J3nYwPPcOsCruewVjWczHH57CJDZCLVZf04/edit",
+    "Teacher Chinese deck (with notes): https://docs.google.com/presentation/d/1s36bpDCvDboK2KJwPZOVA8OHwisTCzNXM5xVBoUO4io/edit",
+    "Student EN-ES deck (no notes): https://docs.google.com/presentation/d/19_zPpzWCP3Yoq0d_kPBxQ_IJYdS81vJ6OqQHuEkfAlc/edit",
+    "Student Chinese deck (no notes): https://docs.google.com/presentation/d/1NhChKl-SRPB6ABkp6bTuk2iOhC5KVXl80Stxq9i_Bgc/edit",
+    "SMG team logins",
+    "Chromebooks"
+   ],
+   "answers": "Sanjana: 400 ÷ 9 = $44.44/month · 44.44 ÷ 4 = $11.11/week · 11.11 ÷ 7 = $1.59/day.",
+   "watch": "43-minute late start: no warm-up. SMG uses the full 20 (district range 15-20). Students keep their goal page for Friday's project. Classroom draft links the STUDENT decks.",
+   "source": "Mario's Consumer Math Ch 5 'Create Your Savings Goals' (NGPF) Part I (15-20 ideas, $100 split) + Part II; SMG Fall 2026 Launch Record (Wed 15-20 min); colleague SMG deck (research step before Journal #2). Part III letter skipped: outside site asks for an email."
+  },
+  "w11-thu-fa": {
+   "course": "FA",
+   "title": "Unit 3 Review Day (22-min drill/rally day)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Review",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Review simple interest, compound interest, and savings goals before Lesson 3.9. Paper, or type in BLACK in the answer boxes.",
+   "flow": [
+    {
+     "m": 3,
+     "t": "Warm-Up",
+     "d": "Simple vs compound in words; $500 at 4% simple for 1 year."
+    },
+    {
+     "m": 4,
+     "t": "Part A: Simple interest",
+     "d": "A1 $1,200 at 5% for 3 yrs · A2 $650 at 2.5% for 4 yrs."
+    },
+    {
+     "m": 7,
+     "t": "Part B: Compound interest",
+     "d": "B1 annually · B2 quarterly · B3 monthly."
+    },
+    {
+     "m": 4,
+     "t": "Part C: Savings goals",
+     "d": "Month / week / day: $360 in 6 months, $1,200 in 10 months."
+    },
+    {
+     "m": 3,
+     "t": "Part D: Which bank wins?",
+     "d": "$1,000, 3 yrs: 5% simple vs 5% compounded annually. Done early: $3,000 at 8% quarterly, 2 yrs."
+    },
+    {
+     "m": 1,
+     "t": "Check answers",
+     "d": "Teacher deck slide 7 only (not in the student deck)."
+    }
+   ],
+   "materials": [
+    "Unit 3 Review Day folder (district): https://drive.google.com/drive/folders/1d5102zZDR_Zux6WWR7alfMcz_Dr2R2EV",
+    "Teacher EN-ES deck (notes + answer slide): https://docs.google.com/presentation/d/167O1zWHepeOENa2Mn2VFpnkijsLJKhGc8iaPyIRZCfY/edit",
+    "Teacher Chinese deck: https://docs.google.com/presentation/d/1e6EIxeLE7NCQ-TGnYjQS2UAIyB0HxdSTr-wYWOjXoe4/edit",
+    "Student EN-ES deck (no notes, no answers): https://docs.google.com/presentation/d/1314EXySZEfOa3gJ8RY1vJ_ijoGznv6iFqmURJtuyaIU/edit",
+    "Student Chinese deck: https://docs.google.com/presentation/d/1FN3onCkHVaV4_W0e10Zjm0PnzLx9np5ktv6E2WjekNA/edit",
+    "Calculators"
+   ],
+   "answers": "WU: the interest (interest on interest) · $20. A1 $180 / $1,380 · A2 $65 / $715. B1 $2,382.03 · B2 $1,624.29 · B3 $901.46. C1 $60 · $15 · $2.14 · C2 $120 · $30 · $4.29. D: B wins by $7.63 ($1,157.63 vs $1,150). Done early: $3,514.98, interest $514.98.",
+   "watch": "Drill + rally day: P2 9:13-9:35, P4 11:39-12:01. Mario swapped Lesson 3.9 Part 1 for this review on Oct 15; everything after moved back one day. Classroom draft attaches the student decks as 'Make a copy for each student' so kids can type (answer boxes type in black).",
+   "source": "Unit 3 Interest Quiz + Lessons 3.6-3.8 (Consumer Math Ch 5 Savings Goals). Builder: System/deck_builder/fa_week11/w11.py thu_review()."
+  },
+  "w11-fri-fa": {
+   "course": "FA",
+   "title": "Sub day (Mario out): Interest + Savings Goals Wayground",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Review (sub)",
+   "mustDo": false,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Mario was out. Students did his 24-question Wayground on simple/compound interest and savings goals (posted 10/16, due Fri 10/23). Lesson 3.9 did NOT happen; moved to Mon 10/19.",
+   "flow": [
+    {
+     "m": 59,
+     "t": "Wayground: Interest + Savings Goals",
+     "d": "24 questions, calculators OK. Classroom post '(10-16-26) FA Interest + Savings Goals', due 10/23."
+    }
+   ],
+   "materials": [
+    "Wayground '(10-16-26) FA Interest + Savings Goals' (Mario's copy, 24 Qs): https://wayground.com/activity/admin/quiz/6ad199355a4d748638c73b0d/edit",
+    "Chromebooks"
+   ],
+   "watch": "SUB DAY (Mario absent Fri 10/16). Chromebook only, no instruction. 24 Qs: the original 19 on simple, compound, car loans, linear vs exponential, plus 5 tying savings goals to simple and compound interest (answers checked by Claude). Scheduled in Wayground (Oct 15): P2 opened Fri 9:40 AM, P4 opened Fri 12:28 PM, both close Fri Oct 23. Shuffle on, scientific calculator on. Lesson 3.9 did NOT happen; moved to Mon 10/19 (Oct 18).",
+   "source": "Mario's own Wayground."
+  },
+  "w12-mon-im1": {
+   "course": "IM1",
+   "title": "4.5 Day 3: Write the Equation from a Table and a Story",
+   "unit": "Unit 4 Linear Functions",
+   "mustDo": true,
+   "standard": "F-IF.6, F-BF.1a, F-LE.2",
+   "type": "New Content",
+   "goal": "I can write y = mx + b from a table and from a story. EQ: If I sell something, how do I know how much money I will have? (previews the Student Business project)",
+   "flow": [
+    {
+     "m": 6,
+     "t": "Warm-Up (recap)",
+     "d": "y = −2x + 3: m, b, crossing, table jump"
+    },
+    {
+     "m": 2,
+     "t": "Goals",
+     "d": "Project preview"
+    },
+    {
+     "m": 5,
+     "t": "Notes 1: From a Table",
+     "d": "jump ÷ jump = m; y at x = 0 = b"
+    },
+    {
+     "m": 5,
+     "t": "Example 1 (table)",
+     "d": "y = 5x − 4"
+    },
+    {
+     "m": 4,
+     "t": "You Try 1 (x by 2s)",
+     "d": "y = 3x + 1"
+    },
+    {
+     "m": 4,
+     "t": "Example 2 (no x = 0)",
+     "d": "y = 3x + 5"
+    },
+    {
+     "m": 5,
+     "t": "Notes 2: From a Story",
+     "d": "per/each = m; fee/start = b; Costco y = 5x; bilingual word box"
+    },
+    {
+     "m": 4,
+     "t": "Example 3 (story)",
+     "d": "Gym y = 12x + 20"
+    },
+    {
+     "m": 3,
+     "t": "You Try 2 (story)",
+     "d": "Lawns y = 8x + 10"
+    },
+    {
+     "m": 14,
+     "t": "Practice: any 4 of 6",
+     "d": "P3 +2"
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "Which words tell m? b?"
+    }
+   ],
+   "materials": [
+    "Teacher deck (11 slides, answers in notes): https://docs.google.com/presentation/d/1dNK2Gms_41iyt_gBENKzop9LusamhwcTyHf3YRBz8e8/edit",
+    "Student deck (no notes, attach in Classroom): https://docs.google.com/presentation/d/1ZSNJEf85eFVE5M8zRxRzTSel4dgsg1v3nAVcpBUXT4U/edit",
+    "PRINT practice sheet (1 page): https://docs.google.com/document/d/1kOfAoVcKWHsP9WEV_bhl7JfRrgHYec3_rtSOSOxHJnU/edit",
+    "KEY: https://docs.google.com/document/d/1K0AANgeszUc92x6COi1ETMz6TG-WHTETl34ZEKlpbQI/edit",
+    "Classroom drafts saved in P1 and P3 (Today's Work)"
+   ],
+   "answers": [
+    "Warm-up: m −2, b 3, (0, 3), jumps −2",
+    "Sheet: 1) y = 4x − 3 · 2) y = −2x + 5 · 3) y = ⅔x + 2 · 4) y = 30x + 50 · 5) y = −2x + 20 · 6) y = 5x + 15"
+   ],
+   "watch": "Approved Oct 18: no Unit 4 Test. Week: Mon table + story, Tue two points + Marilynn T-shirt example (Part 1), Wed to Fri Student Business project (his own Parts 2 and 3, simplified, start-up cost + inventory lines, 10 x 2 rubric). Thu 10/22 is College Kick Off, 28-min periods."
+  },
+  "w12-tue-im1": {
+   "course": "IM1",
+   "unit": "Unit 4 Linear Functions",
+   "standard": "F-IF.6, F-BF.1a, F-LE.2",
+   "title": "4.5 Day 4: Two Points + Marilynn's T-Shirts",
+   "mustDo": true,
+   "type": "New Content",
+   "goal": "I can write y = mx + b from two points, and read a real graph (Marilynn's T-shirts). EQ: If I only know two moments of a business, can I predict the rest?",
+   "flow": [
+    {
+     "m": 6,
+     "t": "Warm-Up (recap)",
+     "d": "Streaming $15 + $7/month: y = 7x + 15 · table: y = 4x + 5"
+    },
+    {
+     "m": 2,
+     "t": "Goals",
+     "d": ""
+    },
+    {
+     "m": 5,
+     "t": "Notes: Two Points",
+     "d": "slope from the two points, then plug ONE point in to find b. Say WHY any point works: both are on the line, so either makes the equation true"
+    },
+    {
+     "m": 6,
+     "t": "Example 1",
+     "d": "(1, 5), (3, 11): y = 3x + 2. Slide says why 5 and 1 (the y and x of (1, 5)); (3, 11) gives the same b"
+    },
+    {
+     "m": 4,
+     "t": "You Try 1",
+     "d": "(2, 1), (5, 13): y = 4x − 7. Check with the OTHER point: same b"
+    },
+    {
+     "m": 5,
+     "t": "Marilynn 1: read the graph",
+     "d": "his Part 1 deck; what does (0, 0) mean?"
+    },
+    {
+     "m": 5,
+     "t": "Marilynn 2: table + equation",
+     "d": "y = 15x"
+    },
+    {
+     "m": 6,
+     "t": "Marilynn 3: use it",
+     "d": "2 → $30, 5 → $75, 9 → $135; 4.5 shirts makes no sense; $100 goal = 7 shirts"
+    },
+    {
+     "m": 14,
+     "t": "Practice: any 4 of 6",
+     "d": "Problems 1 to 4 two points, 5 and 6 stories. Extra credit: make your own problem (back of the sheet), comment in Google Classroom. P3 +2"
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "Which part is the slope? Project starts tomorrow"
+    }
+   ],
+   "materials": [
+    "Teacher deck (10 slides, answers in notes): https://docs.google.com/presentation/d/1z2xeULMhcrJHCRqEDeW7S8zGRKhz-mBWwwD-b1x_KDQ/edit",
+    "Student deck (no notes, attach in Classroom): https://docs.google.com/presentation/d/1CeJvfbgrrSenrRzSbq5_AwixZ_AJvcGEkUDGHx_3JUY/edit",
+    "PRINT practice sheet (1 page): https://docs.google.com/document/d/1QdKG_tMN6layWl4g2P8rJ1Zx2rvH_up4UiFfZ-02qDs/edit",
+    "KEY: https://docs.google.com/document/d/1rWSLLmcL0OzLfXih3IdXA8g2z7Mpb6Nh2cMqEE8mTUg/edit",
+    "Classroom drafts saved in P1 and P3 (Today's Work)"
+   ],
+   "answers": [
+    "Warm-up: 1) y = 7x + 15 · 2) y = 4x + 5",
+    "Ex 1: y = 3x + 2 · You Try: y = 4x − 7",
+    "Marilynn: y = 15x; $100 goal → 7 shirts",
+    "Sheet: 1) y = 4x + 3 · 2) y = 2x · 3) y = −2x + 13 · 4) y = ½x + 6 · 5) bracelets y = 8x, 8 bracelets = $64 · 6) skate park y = 6x + 4, 8 hours = $52 · Extra credit: answers vary, check the other point",
+    "Why 5 and 1 in Example 1: they are the y and x of the point (1, 5). Using (3, 11) instead: 11 = 3(3) + b gives b = 2 too."
+   ],
+   "watch": "55 min planned: about 4 min buffer in P1, 6 in P3. Marilynn graph is from his own 'Interpreting Scenarios of Linear Functions (Part 1)' deck. Oct 20: added the \"why this point\" explanation to the Notes slide, Example 1, You Try 1 and the practice sheet hint, after Mario asked why Example 1 used 5 and 1. Decks re-imported in the district Drive (same links). Oct 20 (later): practice sheet redesigned (boxed problems, steps, 2 pages), problem 6 added, extra credit box with \"comment in Google Classroom\" note. Deck slide 9 updated to match."
+  },
+  "w12-wed-im1": {
+   "course": "IM1",
+   "unit": "Unit 4 Linear Functions",
+   "standard": "F-IF.6, F-BF.1a, F-LE.2",
+   "title": "Student Business Project Day 1: Launch (43 min)",
+   "mustDo": true,
+   "type": "Project",
+   "goal": "Start the Student Business project: pick a business, make a sales table, write y = mx + b and say what m and b mean.",
+   "flow": [
+    {
+     "m": 3,
+     "t": "Launch",
+     "d": "Daily Slides 1; open the template from Classroom"
+    },
+    {
+     "m": 8,
+     "t": "Example: Mr. Mendez's Tamales",
+     "d": "table and y = 3x written live"
+    },
+    {
+     "m": 28,
+     "t": "Work time",
+     "d": "Template slides 3, 4, 5 (business, table, equation). P3 +3"
+    },
+    {
+     "m": 4,
+     "t": "Close",
+     "d": "Show me slide 5"
+    }
+   ],
+   "materials": [
+    "Project folder (district): https://drive.google.com/drive/folders/1QoNRJcSAQrSXC7qSxhANrv5m5Akrl_YB",
+    "Student Template (Classroom: Make a copy for each student; tamales example in the speaker notes): https://docs.google.com/presentation/d/12xqz-litvmQ_8sdBTbYY9sSb76Nkpr9E00GH2yZ7dso/edit",
+    "Daily Slides, teacher (notes): https://docs.google.com/presentation/d/1CljXS48gc5vuBTf8EjYbEZ-Dc2C-BL3sohQqB1O9diA/edit",
+    "Daily Slides, student (no notes): https://docs.google.com/presentation/d/1sA3QLkxEGGiS2DI9ankMNnRUeaMXFEsjSOKP0-_lALo/edit",
+    "Rubric (10 x 2 = 20 pts): https://docs.google.com/document/d/1aCM5-Zdudb93EN_kfqCgVqAqUOr6OGnLqxYEL5ZxzGw/edit",
+    "Classroom drafts saved in P1 and P3: (10-21-26) Student Business Project (Wed to Fri), 20 pts, Today's Work",
+    "Chromebooks"
+   ],
+   "answers": [
+    "Teacher example, Mr. Mendez's Tamales: $3 each, y = 3x",
+    "Start-up $60: y = 3x − 60, break-even 20 tamales",
+    "Inventory: y = −8x + 40, runs out on day 5 · Booth fee: y = 10 (zero slope)",
+    "$100 goal: 34 tamales (round UP)"
+   ],
+   "watch": "Late start, 43 min (P3 46). Choice built in: any business, any price."
+  },
+  "w12-thu-im1": {
+   "course": "IM1",
+   "unit": "Unit 4 Linear Functions",
+   "standard": "F-IF.6, F-BF.1a, F-LE.2",
+   "title": "Student Business Project Day 2 (28-min College Kick Off day)",
+   "mustDo": true,
+   "type": "Project",
+   "goal": "Graph the sales table and use the equation. No new teaching.",
+   "flow": [
+    {
+     "m": 2,
+     "t": "Settle",
+     "d": "Daily Slides: Thursday to-do"
+    },
+    {
+     "m": 24,
+     "t": "Work time",
+     "d": "Template slides 6, 7: graph with a labeled scale; $100 goal, round UP. Done? Partner check slides 3 to 5"
+    },
+    {
+     "m": 2,
+     "t": "Close",
+     "d": ""
+    }
+   ],
+   "materials": [
+    "Project folder (district): https://drive.google.com/drive/folders/1QoNRJcSAQrSXC7qSxhANrv5m5Akrl_YB",
+    "Student Template (Classroom: Make a copy for each student; tamales example in the speaker notes): https://docs.google.com/presentation/d/12xqz-litvmQ_8sdBTbYY9sSb76Nkpr9E00GH2yZ7dso/edit",
+    "Daily Slides, teacher (notes): https://docs.google.com/presentation/d/1CljXS48gc5vuBTf8EjYbEZ-Dc2C-BL3sohQqB1O9diA/edit",
+    "Daily Slides, student (no notes): https://docs.google.com/presentation/d/1sA3QLkxEGGiS2DI9ankMNnRUeaMXFEsjSOKP0-_lALo/edit",
+    "Rubric (10 x 2 = 20 pts): https://docs.google.com/document/d/1aCM5-Zdudb93EN_kfqCgVqAqUOr6OGnLqxYEL5ZxzGw/edit",
+    "Classroom drafts saved in P1 and P3: (10-21-26) Student Business Project (Wed to Fri), 20 pts, Today's Work",
+    "Chromebooks"
+   ],
+   "answers": [
+    "Teacher example, Mr. Mendez's Tamales: $3 each, y = 3x",
+    "Start-up $60: y = 3x − 60, break-even 20 tamales",
+    "Inventory: y = −8x + 40, runs out on day 5 · Booth fee: y = 10 (zero slope)",
+    "$100 goal: 34 tamales (round UP)"
+   ],
+   "watch": "College Kick Off: periods are 28 minutes (P1 11:53 to 12:21, P3 1:37 to 2:05)."
+  },
+  "w12-mon-fa": {
+   "course": "FA",
+   "title": "Lesson 3.9: Interest Rates Matter! (linear vs exponential + car loan)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "New Content",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "LT: I can tell if a money situation is linear or exponential from a table, graph, or equation, and see how the interest rate changes what I pay back. EQ: When does a small change in the rate cost you thousands?",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up",
+     "d": "$1,000 at 10%: simple 1 year; compound 2 years; is y = 100x + 1,000 a line or a curve?"
+    },
+    {
+     "m": 2,
+     "t": "Title + Goals",
+     "d": ""
+    },
+    {
+     "m": 7,
+     "t": "Notes: Linear vs Exponential",
+     "d": "adds the same amount, y = mx + b, line, simple · multiplies by the same number, y = a·b^x, curve, compound."
+    },
+    {
+     "m": 8,
+     "t": "Example 1 (I do): $1,000 at 10% for 5 years",
+     "d": "Simple and compound tables side by side, then both equations."
+    },
+    {
+     "m": 6,
+     "t": "Concept Check 1",
+     "d": "$500 at 6% for 4 years: both equations, year 4."
+    },
+    {
+     "m": 10,
+     "t": "Example 2 (I do): $15,000 car loan",
+     "d": "New 3.9% vs used 11.9%, 5 years compounded annually. Predict: triple?"
+    },
+    {
+     "m": 6,
+     "t": "Concept Check 2",
+     "d": "Equations, interest on each car, used ÷ new."
+    },
+    {
+     "m": 3,
+     "t": "Summary",
+     "d": "Saving: interest works FOR you. Borrowing: AGAINST you."
+    },
+    {
+     "m": 11,
+     "t": "Practice",
+     "d": "4 problems: 2 tables (L or E), simple vs compound difference, $8,000 loan at 7% for 3 years."
+    }
+   ],
+   "materials": [
+    "Lesson 3.9 folder (district): https://drive.google.com/drive/folders/139dcII30BOEkY_pAY5GX_nOrWPJ1WCO8",
+    "Teacher EN-ES deck (with notes): https://docs.google.com/presentation/d/1TCeOI3nG3U9LvH-QDmlFT_PYkx66ca9d3MgRadF6i-k/edit",
+    "Teacher Chinese deck: https://docs.google.com/presentation/d/1TQTZxvpH_vV1wWvCUuVdwTQjDXF4Qdyxoq8HpXuuI3M/edit",
+    "Student EN-ES deck (no notes): https://docs.google.com/presentation/d/1zOmoXaGGOLINmcPdunsiB3PtzkRYEr8NVZvlmGRevnc/edit",
+    "Student Chinese deck: https://docs.google.com/presentation/d/1I9Yd8ARDfxRwmuzmxutgy1_8gmMRP_9Y1Li9FNMpyso/edit",
+    "Calculators"
+   ],
+   "answers": "WU $100 · $1,210 · line. Ex1 simple 1,100…1,500, y = 100x + 1,000; compound 1,100 · 1,210 · 1,331 · 1,464.10 · 1,610.51, y = 1,000(1.1)^x. CC1 y = 30x + 500 → $620; y = 500(1.06)^x → $631.24. Car: new $18,162.22 (interest $3,162.22), used $26,317.32 (interest $11,317.32), ≈ 3.58×: more than triple. Practice: 1) linear y = 15x + 200 · 2) exponential y = 300(1.1)^x · 3) simple $2,600 vs compound $2,680.19, difference $80.19 · 4) owed $9,800.34, interest $1,800.34.",
+   "watch": "Moved from Fri 10/16 (Mario out; sub ran the Wayground) on Oct 18. Same decks and links, re-dated '(10-19-26)', tag MON 10/19. This is the last new-content lesson of Unit 3.",
+   "source": "KG (colleague) Unit 3 Packet pp. 51-54, IMP 'Investing and Borrowing: Interest Rates Matter!' (read-only original, rebuilt in Mario's deck style). Builder: w11.py fri_lesson39()."
+  },
+  "w12-tue-fa": {
+   "course": "FA",
+   "title": "Unit 3 Project Launch: My Paycheck, My Plan (Part 1)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Project",
+   "mustDo": true,
+   "standard": "CA CCSS N-Q.1, A-SSE.1, F-LE.1–2 (linear vs exponential growth); SMP 1, 3, 4, 6.",
+   "goal": "Project v2 (Mario, Oct 20: the bank-research version was too easy for AI/Google). Each student's numbers come from a job card or their real job. Today Part 1: paycheck → goal. Due Fri 10/23, 40 pts.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Warm-Up: which job?",
+     "d": "A $20 × 10 = $200 vs B $17 × 14 = $238. B more per week, A more per hour."
+    },
+    {
+     "m": 1,
+     "t": "Title",
+     "d": "Work it. Save it. Grow it. Due Fri 10/23 · 40 pts."
+    },
+    {
+     "m": 4,
+     "t": "How this project works",
+     "d": "One page a day on paper: Tue P1 (10) · Wed-Thu P2 bank offers (14) · Thu P3 audit the AI (8) · Fri P4 borrow instead? (8)."
+    },
+    {
+     "m": 3,
+     "t": "Pick your job + goal",
+     "d": "8 job cards or real job (optional, no boss names). Goal: Wed 10/14 goal or a goal card."
+    },
+    {
+     "m": 8,
+     "t": "Example 1 (I do): fast food → phone",
+     "d": "300 → 277.05 → 55.41/wk → 15 weeks → 43.3 hours of work → P = $2,900."
+    },
+    {
+     "m": 6,
+     "t": "Your turn: babysitting → console",
+     "d": "144 cash → 36/wk → 13 weeks → 25 hours → P = $1,900."
+    },
+    {
+     "m": 2,
+     "t": "Rubric",
+     "d": "10 + 14 + 8 + 8 = 40."
+    },
+    {
+     "m": 28,
+     "t": "Work time: Part 1 steps 1-8",
+     "d": "Over 52 weeks? change one thing. Write P at the bottom."
+    },
+    {
+     "m": 2,
+     "t": "Exit",
+     "d": "'My goal costs ___ hours of work.' Say it to a partner."
+    }
+   ],
+   "materials": [
+    "Unit 3 Project folder (district): https://drive.google.com/drive/folders/1mA460K0EqiTB2TO30AAey0qxvuPFAxvR",
+    "Teacher EN-ES deck (notes): https://docs.google.com/presentation/d/1XmGfyeEtUwMltv5pgQVJOFSQ-0sHi9VcO-g5r5iwfNs/edit",
+    "Teacher Chinese deck: https://docs.google.com/presentation/d/1oslJlTDkvHJsYRvuiad8VGc8hGZ9iKfCeT5sOrxN8wM/edit",
+    "Student EN-ES deck (no notes): https://docs.google.com/presentation/d/1TymujKG96Ecv4Z_z4VP6yukguZghgSZ-EoAImdE2CVc/edit",
+    "Student Chinese deck: https://docs.google.com/presentation/d/1rRWgHAi65Jl0r3ZsmGx_B9WrxhqI009wPTkHBNA8TmI/edit",
+    "Part 1 page EN-ES (print): https://docs.google.com/document/d/1YGoeVpql4j10-GoGza4xvpt-HJAmiyhXzOeN35jPtrE/edit",
+    "Part 1 page Chinese (print): https://docs.google.com/document/d/1qAndd9h4uqdvx4DKJH_j6pDDYuutWsmuKSRo5zGCCS4/edit",
+    "Part 1 KEY (every job card at 10/20/25%): https://docs.google.com/document/d/1ApyjVdir8sCYIKNA_mKifkL0eW6C3G9i3zKK98B7-WM/edit",
+    "Calculators / Chromebooks"
+   ],
+   "answers": [
+    "WU: A $200, B $238",
+    "Ex1: $300.00 · $277.05 · $55.41/wk · 15 weeks (~4 months) · $18.47/hr → 43.3 hours · $2,881.32 → P $2,900",
+    "You do: $144.00 · $144.00 (cash) · $36.00/wk · 13 weeks · 25 hours · $1,872 → P $1,900",
+    "All 8 job cards at 10/20/25%: Part 1 KEY",
+    "Early-finisher comparison, same $800 phone and 20% savings: card 1 = 15 weeks and 43.3 hours; card 6 = 28 weeks and 44.4 hours. Weeks depend on weekly earnings and savings rate; hours of work depend on net hourly pay."
+   ],
+   "watch": "Completed Oct 20 by Codex: both original Part 1 student Docs updated in place; native Chrome print previews verified 2 pages each. Includes P = principal definition with Spanish/Chinese explanation, early-finisher second-job comparison, and teacher Part 1 /10 box with 3 anchor checks. Print ONE language version per student, front/back; choices called job/goal cards are already printed on page 1, no separate cards needed. Students KEEP the sheet: P is tomorrow's money. Real job optional; never collect employer names or paystubs. Live teacher-key Doc was NOT edited by Codex; the builder contains the early-finisher answer. Planning discussion only, not a confirmed rule or a materials edit: Codex recommended one goal; if Mario allows multiple goals, combine their costs consistently for weeks/hours, but P remains annual savings rounded to nearest $100 (do not subtract purchases). Decks, Classroom, sharing and due date were not changed by Codex. Completion of student work is not confirmed.",
+   "source": "Mario's Consumer Math Ch 4 'Checking Account Research' + Ch 5 'Create Your Savings Goals'. Current project builders: System/deck_builder/fa_week12/paycheck.py and paycheck_doc.py. Repo backup of Part 1 builder: tools/quizzes/paycheck_part1.py."
+  },
+  "w12-wed-fa": {
+   "course": "FA",
+   "title": "Late Start: SMG Check-In + Project Work",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "District routine + Project",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "SMG check-in, then Part 2 starts: grow YOUR P (from Part 1) at 3 made-up bank offers.",
+   "flow": [
+    {
+     "m": 20,
+     "t": "SMG check-in",
+     "d": "Team login, value, one decision, 2-sentence note; follow up last week's 'new company'."
+    },
+    {
+     "m": 21,
+     "t": "Part 2: which bank wins?",
+     "d": "Mini-model at the top, then tables for the 3 offers with your own P."
+    },
+    {
+     "m": 2,
+     "t": "Checkpoint",
+     "d": "Show your 3 table rows for year 1."
+    }
+   ],
+   "materials": [
+    "Unit 3 Project folder (district): https://drive.google.com/drive/folders/1mA460K0EqiTB2TO30AAey0qxvuPFAxvR",
+    "Part 2 page + Wed-Fri deck: Claude is building Oct 20 (links in Plans/FA_WEEK_12)",
+    "Part 1 KEY (every job card at 10/20/25%): https://docs.google.com/document/d/1ApyjVdir8sCYIKNA_mKifkL0eW6C3G9i3zKK98B7-WM/edit"
+   ],
+   "watch": "P2 leans on 3.9 (taught Mon). Re-do yesterday's simple vs compound table in the mini-model.",
+   "source": "Builder: System/deck_builder/fa_week12/w12.py"
+  },
+  "w12-thu-fa": {
+   "course": "FA",
+   "title": "Project: Part 2 Finish + Part 3 Audit the AI",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Project",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Finish Part 2 (equations, Desmos graph, winner for YOUR money), then Part 3: find and fix an AI answer's 3 mistakes, on paper.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Where should I be?",
+     "d": "Checklist slide."
+    },
+    {
+     "m": 25,
+     "t": "Part 2 finish",
+     "d": "3 equations, Desmos graph (line vs curves), pick the winner for your P and years."
+    },
+    {
+     "m": 25,
+     "t": "Part 3: Audit the AI",
+     "d": "Printed 'AI answer' with 3 planted mistakes (labeled WRONG). Find, explain, fix."
+    },
+    {
+     "m": 4,
+     "t": "Debrief",
+     "d": "AI is a tool you check, not an answer key."
+    }
+   ],
+   "materials": [
+    "Unit 3 Project folder (district): https://drive.google.com/drive/folders/1mA460K0EqiTB2TO30AAey0qxvuPFAxvR",
+    "Part 2-3 pages + deck: Claude is building Oct 20"
+   ],
+   "answers": "Model (APY 4%): simple 520 · 560 · 600; compound 520.00 · 562.43 · 608.33; difference $8.33.",
+   "watch": "Print the Part 3 AI page. Do it on paper in class.",
+   "source": "Builder: w12.py"
+  },
+  "w12-fri-fa": {
+   "course": "FA",
+   "title": "Project Finish + Turn In (Unit 3 Project due)",
+   "unit": "Unit 3 — Savings & Checking Accounts",
+   "type": "Project",
+   "mustDo": true,
+   "standard": "CA CCSS A-SSE.1, F-LE.1–2 (linear vs exponential growth), N-Q.1; SMP 1, 4, 6.",
+   "goal": "Part 4: borrow your goal instead of saving; cost in hours of work. 1-minute 'defend your pick' talks while students work. Collect all pages.",
+   "flow": [
+    {
+     "m": 5,
+     "t": "Where should I be?",
+     "d": "Checklist slide."
+    },
+    {
+     "m": 30,
+     "t": "Part 4: borrow instead?",
+     "d": "Loan owed + interest; interest ÷ net pay per hour = hours worked for interest. Teacher calls students up for 1-min defend-your-pick."
+    },
+    {
+     "m": 10,
+     "t": "Fix anything missing",
+     "d": ""
+    },
+    {
+     "m": 5,
+     "t": "Turn in all pages",
+     "d": "Staple Parts 1-4."
+    },
+    {
+     "m": 9,
+     "t": "Done early: Wayground",
+     "d": "Interest + Savings Goals (due today)."
+    }
+   ],
+   "materials": [
+    "Unit 3 Project folder (district): https://drive.google.com/drive/folders/1mA460K0EqiTB2TO30AAey0qxvuPFAxvR",
+    "Part 4 page + deck: Claude is building Oct 20"
+   ],
+   "watch": "Wayground also closes today.",
+   "source": "Builder: w12.py"
+  },
+  "w12-fri-im1": {
+   "course": "IM1",
+   "unit": "Unit 4 Linear Functions",
+   "standard": "F-IF.6, F-BF.1a, F-LE.2",
+   "title": "Student Business Project Day 3: Finish + Turn In",
+   "mustDo": true,
+   "type": "Project",
+   "goal": "Add a start-up cost (break-even), an inventory line and a booth fee, reflect, and turn in.",
+   "flow": [
+    {
+     "m": 8,
+     "t": "Mini-lesson",
+     "d": "Template slides 8 and 9 with the tamales: y = 3x − 60, break-even 20; y = −8x + 40; y = 10"
+    },
+    {
+     "m": 45,
+     "t": "Work time",
+     "d": "Slides 8, 9, 10, then turn in. Optional poster or flyer. P3 +2"
+    },
+    {
+     "m": 6,
+     "t": "Turn in + share",
+     "d": "Rubric self-check; one or two volunteers share"
+    }
+   ],
+   "materials": [
+    "Project folder (district): https://drive.google.com/drive/folders/1QoNRJcSAQrSXC7qSxhANrv5m5Akrl_YB",
+    "Student Template (Classroom: Make a copy for each student; tamales example in the speaker notes): https://docs.google.com/presentation/d/12xqz-litvmQ_8sdBTbYY9sSb76Nkpr9E00GH2yZ7dso/edit",
+    "Daily Slides, teacher (notes): https://docs.google.com/presentation/d/1CljXS48gc5vuBTf8EjYbEZ-Dc2C-BL3sohQqB1O9diA/edit",
+    "Daily Slides, student (no notes): https://docs.google.com/presentation/d/1sA3QLkxEGGiS2DI9ankMNnRUeaMXFEsjSOKP0-_lALo/edit",
+    "Rubric (10 x 2 = 20 pts): https://docs.google.com/document/d/1aCM5-Zdudb93EN_kfqCgVqAqUOr6OGnLqxYEL5ZxzGw/edit",
+    "Classroom drafts saved in P1 and P3: (10-21-26) Student Business Project (Wed to Fri), 20 pts, Today's Work",
+    "Chromebooks"
+   ],
+   "answers": [
+    "Teacher example, Mr. Mendez's Tamales: $3 each, y = 3x",
+    "Start-up $60: y = 3x − 60, break-even 20 tamales",
+    "Inventory: y = −8x + 40, runs out on day 5 · Booth fee: y = 10 (zero slope)",
+    "$100 goal: 34 tamales (round UP)"
+   ],
+   "watch": "Project due today (20 pts). Good day for the weekly stoplight exit if time allows."
+  }
+ },
+ "keyDates": [
+  {
+   "date": "2026-08-05",
+   "label": "First day of instruction"
+  },
+  {
+   "date": "2026-09-07",
+   "label": "Labor Day — no school"
+  },
+  {
+   "date": "2026-10-09",
+   "label": "Quarter 1 ends"
+  },
+  {
+   "date": "2026-10-12",
+   "label": "No school for students"
+  },
+  {
+   "date": "2026-10-15",
+   "label": "Great ShakeOut drill + Homecoming rally: 22-minute periods"
+  },
+  {
+   "date": "2026-10-22",
+   "label": "College Kick Off: 28-minute periods (IM1: project work day)"
+  },
+  {
+   "date": "2026-10-23",
+   "label": "FA: Unit 3 Project due · IM1: Student Business Project due"
+  },
+  {
+   "date": "2026-10-28",
+   "label": "FA: SMG Journal #2 Diversification Research"
+  },
+  {
+   "date": "2026-11-11",
+   "label": "Veterans Day — no school"
+  },
+  {
+   "date": "2026-11-23",
+   "label": "Thanksgiving week begins — no school through Nov 27"
+  },
+  {
+   "date": "2026-12-18",
+   "label": "Semester 1 ends"
+  },
+  {
+   "date": "2027-03-12",
+   "label": "Quarter 3 ends"
+  },
+  {
+   "date": "2027-06-04",
+   "label": "Last day of instruction"
+  }
+ ],
+ "pacing": {
+  "IM1": [
+   {
+    "wk": 1,
+    "dates": "Aug 5-7",
+    "unit": "Intro Weeks — routines, culture, Reveal orientation",
+    "note": "3 days only"
+   },
+   {
+    "wk": 2,
+    "dates": "Aug 10-14",
+    "unit": "STAR · ALEKS check · 1.1 Integers · 1.2 Coordinate Plane",
+    "note": "All must-do"
+   },
+   {
+    "wk": 3,
+    "dates": "Aug 17-21",
+    "unit": "1.2 Coordinate Plane · 1.3 Numerical Expressions → Module 3 begins Thu Aug 20",
+    "note": "GEMDAS not PEMDAS"
+   },
+   {
+    "wk": 4,
+    "dates": "Aug 24-28",
+    "unit": "Module 3: Define Functions · Function Notation · Applications"
+   },
+   {
+    "wk": 5,
+    "dates": "Aug 31-Sep 4",
+    "unit": "Module 3: Practice · Sorting & Sketching · Intercepts"
+   },
+   {
+    "wk": 6,
+    "dates": "Sep 8-11",
+    "unit": "Module 3: Shapes of Graphs · Sketching · Review/Assess",
+    "note": "4-day week · Module 3 test"
+   },
+   {
+    "wk": 7,
+    "dates": "Sep 14-18",
+    "unit": "3a. Solving One-Step Linear Equations"
+   },
+   {
+    "wk": 8,
+    "dates": "Sep 21-25",
+    "unit": "Linear Functions — Growing Towers, Arithmetic Sequences"
+   },
+   {
+    "wk": 9,
+    "dates": "Sep 28-Oct 2",
+    "unit": "Linear Functions — Graphing, Rate of Change & Slope",
+    "note": "4.3 took 2 days. Showdown review (P3), Practice Quiz Fri. Quiz moved to Mon Oct 5."
+   },
+   {
+    "wk": 10,
+    "dates": "Oct 5-9",
+    "unit": "Unit 4 Quiz (Mon) → 4.4 Slope (Tue, Thu) → 4.5 Slope-Intercept Day 1 (Fri)",
+    "note": "Q1 ENDS OCT 9. Thu/Fri became practice + one-at-a-time graphing quiz (Mario, Oct 8). Four Kinds of Slope moved to Tue 10/13."
+   },
+   {
+    "wk": 11,
+    "dates": "Oct 12-16",
+    "unit": "Tue 4.4 Four Kinds of Slope · Wed 4.5 graph/table · Thu Classtime review (22-min day) · Fri 4.5 story/two points",
+    "note": "Mon 10/12 no school. Thu 10/15 drill + rally, 22-minute periods."
+   },
+   {
+    "wk": 12,
+    "dates": "Oct 19-23",
+    "unit": "Mon Practice Test · Tue go over + review · Wed review (late start) · Thu 10/22 Unit 4 Test · Fri 3b Two-Step Equations begins",
+    "note": "Test moved from Tue 10/20 to Thu 10/22 (Mario, Oct 13)."
+   },
+   {
+    "wk": 13,
+    "dates": "Oct 26-30",
+    "unit": "Bivariate Data (Module 5)"
+   },
+   {
+    "wk": 14,
+    "dates": "Nov 2-6",
+    "unit": "Bivariate wraps → 3c. Multi-Step Equations begins"
+   },
+   {
+    "wk": 15,
+    "dates": "Nov 9-13",
+    "unit": "3c. Multi-Step Equations",
+    "note": "4-day week"
+   },
+   {
+    "wk": 16,
+    "dates": "Nov 16-20",
+    "unit": "Linear vs. Exponential (Module 8)",
+    "note": "Nov 23-27 OFF"
+   },
+   {
+    "wk": 17,
+    "dates": "Nov 30-Dec 4",
+    "unit": "Linear vs. Exponential"
+   },
+   {
+    "wk": 18,
+    "dates": "Dec 7-11",
+    "unit": "Linear vs. Exponential — unit test"
+   },
+   {
+    "wk": 19,
+    "dates": "Dec 14-18",
+    "unit": "Review + Semester 1 Final"
+   }
+  ],
+  "FA": [
+   {
+    "wk": 1,
+    "dates": "Aug 5-7",
+    "unit": "Intro Week — routines, course purpose, ALEKS knowledge check",
+    "note": "3 days only"
+   },
+   {
+    "wk": 2,
+    "dates": "Aug 10-14",
+    "unit": "Intro wraps → Unit 1: Earning Income begins"
+   },
+   {
+    "wk": 3,
+    "dates": "Aug 17-21",
+    "unit": "Unit 1: Earning Income — paycheck deductions, careers project"
+   },
+   {
+    "wk": 4,
+    "dates": "Aug 24-28",
+    "unit": "Unit 1 — unit test"
+   },
+   {
+    "wk": 5,
+    "dates": "Aug 31-Sep 4",
+    "unit": "Unit 2: Living & Spending (linear expressions/equations)"
+   },
+   {
+    "wk": 6,
+    "dates": "Sep 8-11",
+    "unit": "Unit 2: Living & Spending",
+    "note": "4-day week"
+   },
+   {
+    "wk": 7,
+    "dates": "Sep 14-18",
+    "unit": "Unit 2: Living & Spending"
+   },
+   {
+    "wk": 8,
+    "dates": "Sep 21-25",
+    "unit": "Unit 2 — unit test"
+   },
+   {
+    "wk": 9,
+    "dates": "Sep 28-Oct 2",
+    "unit": "Unit 3: Savings & Checking (linear + exponential)"
+   },
+   {
+    "wk": 10,
+    "dates": "Oct 5-9",
+    "unit": "Unit 3: 3.6 Simple Interest (Mon) → 3.7 Compound by table (Tue) · SMG + compounding (Wed) · game + Wayground (Thu) · 3.7 Day 2 formula (Fri)",
+    "note": "QUARTER 1 ENDS OCT 9. Interest Quiz moved to Tue 10/13."
+   },
+   {
+    "wk": 11,
+    "dates": "Oct 12-16",
+    "unit": "Unit 3: Interest Quiz (Tue) · SMG + 3.8 Savings Goals (Wed) · Review Day, 22 min (Thu) · sub day: Interest + Savings Goals Wayground (Fri)",
+    "note": "Mon Oct 12 no school. Thu drill + rally (22 min) became a review day. Mario out Fri 10/16. 3.9 moved to Mon 10/19."
+   },
+   {
+    "wk": 12,
+    "dates": "Oct 19-23",
+    "unit": "Mon 3.9 Interest Rates Matter · Tue project launch · Wed SMG + work · Thu work + partner check · Fri project due + Wayground due",
+    "note": "Project replaces the Unit 3 test (due Fri 10/23). Unit 4a still starts Mon 10/26. Set Oct 18."
+   },
+   {
+    "wk": 13,
+    "dates": "Oct 26-30",
+    "unit": "Unit 4a: Managing Credit & Understanding Functions",
+    "note": "Wed 10/28: SMG Journal #2 Diversification Research (team sheet, 11 sectors, 20 min) from the colleague SMG deck. Journal #1 was posted Sep 22."
+   },
+   {
+    "wk": 14,
+    "dates": "Nov 2-6",
+    "unit": "Unit 4a: Managing Credit"
+   },
+   {
+    "wk": 15,
+    "dates": "Nov 9-13",
+    "unit": "Unit 4a: Managing Credit",
+    "note": "4-day week"
+   },
+   {
+    "wk": 16,
+    "dates": "Nov 16-20",
+    "unit": "Unit 4a — unit test",
+    "note": "Nov 23-27 OFF"
+   },
+   {
+    "wk": 17,
+    "dates": "Nov 30-Dec 4",
+    "unit": "BUFFER — catch-up / Unit 4a extension",
+    "note": "Real slack. Don't fill it early."
+   },
+   {
+    "wk": 18,
+    "dates": "Dec 7-11",
+    "unit": "BUFFER — semester project work"
+   },
+   {
+    "wk": 19,
+    "dates": "Dec 14-18",
+    "unit": "Review + Semester 1 Final"
+   }
+  ]
+ },
+ "prep": [
+  {
+   "for": "2026-08-10",
+   "text": "Confirm ALEKS rosters — log in AS a student yourself and click through. Both courses. FA uses the College Preparedness path, IM1 does not.",
+   "critical": true
+  },
+  {
+   "for": "2026-08-10",
+   "text": "Print: FA Start-of-Year Check (one per FA student, backstop only — not required if the deck fits the period)"
+  },
+  {
+   "for": "2026-08-10",
+   "text": "Print: blank number lines, coordinate grids, exit tickets, Careers & Salary project"
+  },
+  {
+   "for": "2026-08-11",
+   "text": "🔴 Confirm or correct the proposed Integers/Coordinate Plane reschedule (see w2-tue-im1 watch note) before Thursday — it's a must-do lesson with no slack left if it slides further",
+   "critical": true
+  },
+  {
+   "for": "2026-08-11",
+   "text": "Send Tuesday's real IM1 plan (Do Now + ALEKS diagnostic flow) when ready, same as you did for Monday — current entry is a placeholder"
+  },
+  {
+   "for": "2026-08-11",
+   "text": "Post a -20 to 20 number line above the whiteboards"
+  },
+  {
+   "for": "2026-08-11",
+   "text": "Copy out the 3 FA files; strip old names, dates, Classroom codes"
+  },
+  {
+   "for": "2026-08-11",
+   "text": "Assign the Delta Math and Desmos activities listed in the lessons"
+  },
+  {
+   "for": "2026-10-05",
+   "text": "Print the Unit 4 Quiz: 'Final' Version A for P1, Version B for P3 (Unit 4 folder).",
+   "critical": true
+  },
+  {
+   "for": "2026-10-06",
+   "text": "Print the 2-page Slope Triangles worksheet (your copy, Lesson 4.4 folder): https://docs.google.com/document/d/1y5Xwq1YWT2Q2t40N3z7oQKmVMuB1Eyx1OKPSFmGONos/edit",
+   "critical": true
+  },
+  {
+   "for": "2026-10-07",
+   "text": "Publish the Wayground '(10-7-26) IM1 Slope Practice' and start it Live: https://wayground.com/activity/admin/quiz/6ac0276d5b8b961dfdda24f4/edit",
+   "critical": false
+  },
+  {
+   "for": "2026-10-07",
+   "text": "FA: test the Investor.gov compound-interest calculator on a student Chromebook (Wednesday activity). If blocked, project it.",
+   "critical": false
+  },
+  {
+   "for": "2026-10-08",
+   "text": "Print: quiz slips (2 per page, cut) https://docs.google.com/document/d/1VdgeVFJWoos6NzGTgxFV9q9MepWdTJ-FUO2IHf0koI4/edit · Round 1 worksheet https://docs.google.com/document/d/1pRKH5I-wFHs9qSnIfkJsr3Z7oEyC4T1EaVetujYxA-0/edit · zombie packet pages 4 and 5 only, front/back. Open the Gemini equation generator on your laptop.",
+   "critical": true
+  },
+  {
+   "for": "2026-10-09",
+   "text": "Before 8:45: open One-Step Quest on a student Chromebook (backup: Slope Skatepark). Print about 15 y = mx + b practice sheets. Enter graphing quiz + Monday quiz scores today (Q1 grades due).",
+   "critical": true
+  },
+  {
+   "for": "2026-10-09",
+   "text": "FA: publish the Wayground 'FA Simple vs Compound Interest Practice' and host it with the timer off (end of the 3.7 Day 2 lesson).",
+   "critical": false
+  },
+  {
+   "for": "2026-10-13",
+   "text": "FA: run the Google Form quiz builder (or check the Form Claude built), set GoGuardian to the Form + desmos.com/scientific, post the Form to Classroom for P2/P4. No Classtime.",
+   "critical": true
+  },
+  {
+   "for": "2026-10-13",
+   "text": "Print the Wed practice sheet, the story + two points sheet (now FRIDAY) and the Unit 4 Practice Test (now MONDAY 10/19, front/back).",
+   "critical": true
+  },
+  {
+   "for": "2026-10-15",
+   "text": "Enter the 8 Classtime questions for Thursday's 22-minute review (list on the Thursday card and in the Lesson 4.5 folder).",
+   "critical": true
+  },
+  {
+   "for": "2026-10-19",
+   "text": "FA: post the Monday draft '(10-19-26) FA - Today's Work: Lesson 3.9 Interest Rates Matter' (Period 4 Classwork, both periods)."
+  },
+  {
+   "for": "2026-10-20",
+   "text": "FA: post the Tuesday launch draft AND the 'Unit 3 Project - My Bank & Savings Plan' draft (Projects topic, due Fri 10/23).",
+   "critical": true
+  }
+ ],
+ "openQuestions": [
+  "Careers & Salary project now launches Mon 8/17 (Week 3) — not yet written into a Week 3 plan.",
+  "IM1 Mon 8/17 (Week 3) = 1.2 Coordinate Plane Day 2: Do Now plotting practice, ~20 min to finish Grid Art (collect it — 10 pts, Projects), formalize the quadrant sign patterns from their drawings, district Google Form quiz as exit. Optional bonus if the room earns it: partners trade point lists only and try to redraw each other's picture. Write into Week 3 plan when built.",
+  "🔴 IM1 CASCADE — CONFIRM OR CORRECT: Tuesday 8/11 is now ALEKS Diagnostic Day (confirmed by Mario), which bumps 1.1 Integers Day 1 (😀 must-do). Proposed default: Day 1 → Thu 8/13, Day 2 → Fri 8/14, 1.2 Coordinate Plane Day 1 → Mon 8/17. This is a proposal only — Thu/Fri/next-Monday entries have NOT been changed yet. Confirm and I'll move them.",
+  "🟡 FA Tuesday SMG — Mario said SMG setup 'probably' happens Tuesday alongside Comparing Salaries L1. Recommended default: fold team-join into Wednesday's already-planned SMG lesson instead, no change to Tuesday needed. Flag if you want it Tuesday instead.",
+  "🟡 Send the FA-specific slide deck link (if one exists separate from the IM1 deck) so Monday's FA flow can be verified exactly instead of mirrored from IM1's structure.",
+  "CFA and STAR window dates for the year — ask the department or the Secondary Math TOSA. HIGHEST PRIORITY. STAR was pulled off Mon 8/10 because you can't test students who can't log in; it needs a real date, and a late-start Wednesday is its natural home.",
+  "Is Financial Algebra in the STAR / CFA cycle at all, or is that IM1-only? FA is a 4th-year elective and the district FA outline names no assessment except the ALEKS knowledge check.",
+  "Exact HS finals dates (likely Dec 16-18 and Jun 2-4)",
+  "Which Wednesdays are late-start (35 of ~38 — assume all)",
+  "Rally days (2) and testing days (8) — dates unknown"
+ ],
+ "notes": []
+};
+
+/* 🔴 BUILD STAMP — bump this to today's date EVERY TIME you republish this artifact.
+   The published page and the file on disk are two different things. On Aug 9 2026 a session
+   edited this file without republishing, so the live link served a 3-day-old plan and Mario
+   was reading a lesson that had already been replaced. The stamp below makes that visible. */
+const BUILT="2026-10-20";
+
+/* ---------------- helpers ---------------- */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const DOW=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MON=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const mins=t=>{const[h,m]=t.split(":").map(Number);return h*60+m};
+const t12=t=>{let[h,m]=t.split(":").map(Number);const ap=h>=12?"PM":"AM";h=h%12||12;return`${h}:${pad(m)} ${ap}`};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* esc() + live links: any http(s) URL in the text becomes a clickable link (new tab). Added Oct 20, 2026 so deck/doc links open with one click. */
+const lk=s=>esc(s).replace(/https?:\/\/(?:(?!&quot;|&lt;|&gt;)[^\s<])+/g,u=>{
+  let t="";const m=u.match(/[.,;:!?]+$/);if(m){t=m[0];u=u.slice(0,-t.length)}
+  if(u.endsWith(")")&&!u.includes("(")){u=u.slice(0,-1);t=")"+t}
+  return`<a class="lnk" href="${u}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${u}</a>${t}`});
+const dayRec=k=>DATA.days.find(d=>d.date===k);
+/* the Mon–Fri week that contains CUR (the day being viewed) */
+function weekOf(k){const d=parse(k),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const f=new Date(m);f.setDate(m.getDate()+4);return[iso(m),iso(f),m,f]}
+function weekLabel(k){const[, ,m,f]=weekOf(k);
+  return m.getMonth()===f.getMonth()?`${MON[m.getMonth()]} ${m.getDate()} – ${f.getDate()}, ${f.getFullYear()}`
+    :`${MON[m.getMonth()]} ${m.getDate()} – ${MON[f.getMonth()]} ${f.getDate()}, ${f.getFullYear()}`}
+function weekDays(k){const[a,b]=weekOf(k);return DATA.days.filter(d=>d.date>=a&&d.date<=b)}
+/* pacing week number: week 1 starts Mon Aug 3, 2026 */
+function paceWeek(){return Math.floor((parse(iso(new Date()))-new Date(2026,7,3))/(7*86400000))+1}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");
+  clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("show"),2200)}
+
+/* ---------------- staleness guard ---------------- */
+/* Tells Mario when what he's reading is older than the plans on his drive,
+   instead of letting him find out mid-lesson. */
+function buildAgeDays(){
+  /* tolerate a suffix like "2026-08-09b" — a past session shipped one and it silently
+     turned the age into NaN, which disabled the staleness banner entirely. */
+  const b=String(BUILT).slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(b))return 0;
+  return Math.floor((parse(iso(new Date()))-parse(b))/86400000)}
+function staleBlock(){
+  const age=buildAgeDays();
+  if(age<7)return"";
+  return`<div class="banner crit printhide"><span class="ic">!</span><div>
+    <b>This page was last rebuilt ${age} days ago.</b> Your plans may have changed since.
+    Ask Claude to republish the dashboard before you rely on what's below.</div></div>`}
+function builtLine(){
+  const d=parse(String(BUILT).slice(0,10)),age=buildAgeDays();
+  const when=`${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  const how=age<=0?"today":age===1?"yesterday":`${age} days ago`;
+  return`Last rebuilt ${when} (${how}).`}
+
+/* ---------------- taught status ---------------- */
+/* One tap per period. Three states, no notes field — on purpose.
+   Cost per day: about 3 seconds. Payoff in June: a pacing calendar that reflects
+   what actually happened, which becomes next year's accurate calendar. */
+const SKEY="taughtStatus";
+const allStatus=()=>JSON.parse(localStorage.getItem(SKEY)||"{}");
+const getStatus=(d,p)=>allStatus()[d+"|"+p]||null;
+function setStatus(d,p,v){
+  const a=allStatus(),k=d+"|"+p;
+  if(a[k]===v)delete a[k]; else a[k]=v;      /* tapping the same one again clears it */
+  localStorage.setItem(SKEY,JSON.stringify(a));
+  /* keep whatever the teacher had open, and don't jump the scroll */
+  const open=$$("#v-today .card.open").map(c=>c.id);
+  const y=window.scrollY;
+  renderToday();
+  open.forEach(id=>{const c=document.getElementById(id);
+    if(c){c.classList.add("open");
+      const b=c.querySelector(".chead");if(b)b.setAttribute("aria-expanded","true")}});
+  window.scrollTo(0,y)}
+
+/* Drift is tracked PER PERIOD, not per course — your two IM1 sections genuinely
+   do drift apart, and that's worth catching. ran long = half a day, didn't happen = a full day. */
+function drift(){
+  const a=allStatus(),out={1:0,2:0,3:0,4:0};
+  Object.entries(a).forEach(([k,v])=>{
+    const p=k.split("|")[1];
+    if(out[p]===undefined)return;
+    if(v==="long")out[p]+=0.5; else if(v==="no")out[p]+=1});
+  return out}
+
+function driftBlock(){
+  const d=drift(),any=Object.values(d).some(v=>v>0);
+  if(!any)return"";
+  const fmt=v=>v===0?"on plan":v===0.5?"half a day behind":v===1?"1 day behind":`${v} days behind`;
+  let h=`<div class="drift printhide"><h3>Pacing check</h3>
+    <div class="dsub">Based on what you've tapped. Sections drift apart — that's normal, but worth seeing.</div><ul>`;
+  [1,2,3,4].forEach(p=>{
+    const c=DATA.assign[p],v=d[p];
+    h+=`<li><span class="dp">P${p} ${c}</span><span class="dv${v===0?" ok":""}">${fmt(v)}</span></li>`});
+  h+=`</ul></div>`;
+  return h}
+
+function statusRow(date,p){
+  const cur=getStatus(date,p);
+  const b=(v,cls,label)=>`<button class="sbtn ${cls}" aria-pressed="${cur===v}"
+    onclick="setStatus('${date}',${p},'${v}')">${label}</button>`;
+  return`<div class="srow printhide"><span class="slab">Taught?</span>
+    ${b("on","on","On plan")}${b("long","long","Ran long")}${b("no","no","Didn't happen")}</div>`}
+
+/* pick which day to show: today if it has a plan, else the next planned day */
+function pickDay(){const t=iso(new Date());
+  if(dayRec(t))return t;
+  const nxt=DATA.days.find(d=>d.date>=t);
+  return nxt?nxt.date:DATA.days[DATA.days.length-1].date}
+let CUR=pickDay();
+
+/* ---------------- now bar ---------------- */
+function tickNow(){
+  const n=new Date(),today=iso(n),cur=n.getHours()*60+n.getMinutes();
+  $("#clock").textContent=t12(`${pad(n.getHours())}:${pad(n.getMinutes())}`);
+  const rec=dayRec(today);
+  if(!rec){
+    const nxt=DATA.days.find(d=>d.date>=today);
+    $("#nowmsg").textContent=nxt?`No class today`:`No plans loaded`;
+    $("#nowsub").textContent=nxt?`Next planned day: ${DOW[parse(nxt.date).getDay()]}, ${MON[parse(nxt.date).getMonth()]} ${parse(nxt.date).getDate()}`:"";
+    return}
+  const bells=DATA.bells[rec.type];
+  const inNow=bells.find(b=>cur>=mins(b.start)&&cur<mins(b.end));
+  if(inNow){
+    const left=mins(inNow.end)-cur;
+    if(inNow.p==="lunch"){$("#nowmsg").textContent="Lunch";$("#nowsub").textContent=`${left} min left`}
+    else{const c=DATA.assign[inNow.p];
+      const L=rec.lessons&&rec.lessons[inNow.p]?DATA.lessons[rec.lessons[inNow.p]]:null;
+      $("#nowmsg").textContent=`Period ${inNow.p} · ${c==="PREP"?"Prep":c==="SUPPORT"?"Support":c}`;
+      $("#nowsub").textContent=(L?L.title+" · ":"")+`${left} min left`}
+  }else{
+    const next=bells.find(b=>mins(b.start)>cur);
+    if(next){const to=mins(next.start)-cur;
+      $("#nowmsg").textContent=next.p==="lunch"?"Lunch next":`Period ${next.p} next`;
+      $("#nowsub").textContent=`starts in ${to} min · ${t12(next.start)}`}
+    else{$("#nowmsg").textContent="Day's done";$("#nowsub").textContent="Go home."}}
+}
+
+/* ---------------- TODAY ---------------- */
+function renderToday(){
+  const rec=dayRec(CUR),d=parse(CUR),late=rec.type==="lateStart";
+  const bells=DATA.bells[rec.type];
+  const isToday=CUR===iso(new Date());
+  const idx=DATA.days.findIndex(x=>x.date===CUR);
+  let h=`<div class="dayhead">
+    <div><div class="d">${isToday?"Today · ":""}${DOW[d.getDay()]}</div>
+    <h2>${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}</h2></div>
+    <div class="navbtns printhide">
+      <button ${idx<=0?"disabled":""} onclick="goDay(-1)">‹ Prev</button>
+      <button ${idx>=DATA.days.length-1?"disabled":""} onclick="goDay(1)">Next ›</button>
+    </div></div>`;
+
+  if(rec.type==="drillRally")h+=`<div class="banner warn"><span class="ic">!</span><div>
+    <b>Drill + rally day: periods are 22 minutes.</b> Disaster drill 9:35–10:35, rally 1:03–1:33.</div></div>`;
+  if(late)h+=`<div class="banner warn"><span class="ic">!</span><div>
+    <b>Late-start Wednesday — periods are 43 minutes, not 59.</b>
+    Every plan below is already built for the short clock. Don't add to them.</div></div>`;
+
+  const kd=DATA.keyDates.find(k=>k.date===CUR);
+  if(kd)h+=`<div class="banner crit"><span class="ic">★</span><div><b>${esc(kd.label)}</b></div></div>`;
+
+  h+=staleBlock();
+  h+=driftBlock();
+  /* status buttons only appear on today and past days — tomorrow stays clean */
+  const canLog=CUR<=iso(new Date());
+
+  h+=`<div class="cards">`;
+  bells.filter(b=>b.p!=="lunch"&&b.p<=6).forEach(b=>{
+    const course=DATA.assign[b.p], lid=rec.lessons&&rec.lessons[b.p], L=lid?DATA.lessons[lid]:null;
+    const now=isToday&&(()=>{const n=new Date(),c=n.getHours()*60+n.getMinutes();
+      return c>=mins(b.start)&&c<mins(b.end)})();
+    if(course==="PREP"||course==="SUPPORT"){
+      h+=`<div class="card free${now?" iscur":""}"><div class="chead" style="cursor:default">
+        <span class="pnum">${b.p}</span><div class="cmid">
+        <div class="ctime">${t12(b.start)} – ${t12(b.end)} · ${b.min} min</div>
+        <div class="ctitle">${course==="PREP"?"Prep period":"IM1 intervention / co-teach"}</div></div>
+        <div class="cright">${now?'<span class="pill now">Now</span>':""}
+        <span class="pill gh">${course==="PREP"?"Free":"Support"}</span></div></div></div>`;
+      return}
+    const cc=course==="IM1"?"im1":"fa";
+    const st=canLog&&L?getStatus(CUR,b.p):null;
+    h+=`<div class="card ${cc}${now?" iscur":""}" id="card-${b.p}">
+      <button class="chead" onclick="toggle(${b.p})" aria-expanded="false">
+        <span class="pnum">${b.p}</span>
+        <div class="cmid">
+          <div class="ctime">${t12(b.start)} – ${t12(b.end)} · ${b.min} min</div>
+          <div class="ctitle">${L?esc(L.title):"No lesson yet"}</div>
+        </div>
+        <div class="cright">
+          ${now?'<span class="pill now">Now</span>':""}
+          ${st==="long"?'<span class="pill must">Ran long</span>':st==="no"?'<span class="pill" style="background:var(--alert-soft);color:var(--alert)">Missed</span>':""}
+          <span class="pill ${cc}">${course}</span>
+          ${L&&L.mustDo?'<span class="pill must">Must-do</span>':""}
+          <span class="chev">▼</span>
+        </div>
+      </button>${canLog&&L?statusRow(CUR,b.p):""}${L?lessonBody(L,b,lid):""}</div>`});
+  h+=`</div>`;
+  h+=`<div class="printhide" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:28px">
+    <button class="act" onclick="openAll()">Expand all</button>
+    <button class="act" onclick="window.print()">Print this day</button>
+    <button class="act" onclick="copyDay()">Copy day as text</button>
+    <button class="act" onclick="makeICS()">Calendar file (.ics)</button></div>`;
+  $("#v-today").innerHTML=h}
+
+function lessonBody(L,b,lid){
+  let h=`<div class="cbody">`;
+  if(L.goal)h+=`<div class="goal">${esc(L.goal)}</div>`;
+  if(L.standard||L.type||L.unit){h+=`<div class="chips" style="margin-bottom:4px">`;
+    if(L.unit)h+=`<span class="chip">${esc(L.unit)}</span>`;
+    if(L.standard)h+=`<span class="chip">${esc(L.standard)}</span>`;
+    if(L.type)h+=`<span class="chip">${esc(L.type)}</span>`;h+=`</div>`}
+  h+=`<div class="seclab">Lesson flow · ${L.flow.reduce((a,f)=>a+f.m,0)} min planned / ${b.min} available</div><ul class="flow">`;
+  L.flow.forEach(f=>{h+=`<li><span class="mm">${f.m}m</span><span><span class="ft">${esc(f.t)}</span>
+    <span class="fd">${lk(f.d)}</span></span></li>`});
+  h+=`</ul>`;
+  if(L.materials){h+=`<div class="seclab">Materials</div><div class="chips">`;
+    L.materials.forEach(m=>h+=`<span class="chip">${lk(m)}</span>`);h+=`</div>`}
+  if(L.resources){h+=`<div class="seclab">Resources</div><div class="chips">`;
+    L.resources.forEach(r=>h+=`<span class="chip">${lk(r)}</span>`);h+=`</div>`}
+  if(L.answers)h+=`<div class="seclab">Answers &amp; teacher notes</div><div class="note">${lk(L.answers)}</div>`;
+  if(L.watch)h+=`<div class="seclab">Watch for</div><div class="note hot">${lk(L.watch)}</div>`;
+  h+=`<div class="acts printhide">
+    <button class="act" onclick="copyLesson('${lid}',${b.p})">Copy as text</button>
+    <button class="act" onclick="printLesson('${lid}',${b.p})">Print / PDF</button></div></div>`;
+  return h}
+
+function toggle(p){const c=$("#card-"+p);if(!c)return;
+  c.classList.toggle("open");
+  const btn=c.querySelector(".chead");
+  btn.setAttribute("aria-expanded",c.classList.contains("open"))}
+function openAll(){$$("#v-today .card").forEach(c=>{if(c.querySelector(".cbody")){c.classList.add("open");
+  const b=c.querySelector(".chead");if(b)b.setAttribute("aria-expanded","true")}});toast("All lessons open")}
+function goDay(n){const i=DATA.days.findIndex(x=>x.date===CUR)+n;
+  if(i<0||i>=DATA.days.length)return;CUR=DATA.days[i].date;renderToday();renderWeek();window.scrollTo(0,0)}
+
+/* ---------------- WEEK ---------------- */
+function renderWeek(){
+  const today=iso(new Date());
+  let h=`<div class="dayhead"><div><div class="d">This week</div>
+    <h2>${weekLabel(CUR)}</h2></div></div>`;
+  const WD=weekDays(CUR);
+  const lw=WD.find(r=>r.type==="lateStart");
+  if(lw){const ld=parse(lw.date);h+=`<div class="banner warn"><span class="ic">!</span><div>
+    <b>${DOW[ld.getDay()]} ${MON[ld.getMonth()].slice(0,3)} ${ld.getDate()} is late start.</b> 43-minute periods. Those plans are built for it.</div></div>`}
+  if(!WD.length)h+=`<div class="qs"><p style="font-size:13.5px;margin:0;color:var(--muted)">No plans loaded for this week yet.</p></div>`;
+  h+=`<div class="wk">`;
+  WD.forEach(rec=>{
+    const d=parse(rec.date),late=rec.type==="lateStart";
+    h+=`<div class="wkday${rec.date===today?" today":""}">
+      <h3><span class="dt">${DOW[d.getDay()].slice(0,3)} ${MON[d.getMonth()].slice(0,3)} ${d.getDate()}</span>
+      ${late?'<span class="pill must">43-min periods</span>':""}
+      ${rec.date===today?'<span class="pill now">Today</span>':""}</h3>`;
+    [1,2].forEach(slot=>{
+      const p=slot===1?1:2, lid=rec.lessons[p], L=lid?DATA.lessons[lid]:null;
+      if(!L)return;
+      const cc=L.course==="IM1"?"im1":"fa";
+      h+=`<div class="wkrow ${cc}"><span class="tag">${L.course}</span>
+        <span>${esc(L.title)}${L.mustDo?" ·  must-do":""}</span></div>`});
+    h+=`</div>`});
+  h+=`</div>`;
+  h+=`<div class="printhide" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:28px">
+    <button class="act" onclick="window.print()">Print the week</button>
+    <button class="act" onclick="copyWeek()">Copy week as text</button>
+    <button class="act" onclick="makeICS()">Calendar file (.ics)</button></div>`;
+  $("#v-week").innerHTML=h}
+
+/* ---------------- SEMESTER ---------------- */
+let SEMC="IM1";
+function renderSem(){
+  let h=`<div class="dayhead"><div><div class="d">Semester 1 · Aug 5 – Dec 18</div>
+    <h2>Pacing</h2></div></div>
+    <div class="togg printhide">
+      <button onclick="setSem('IM1')" aria-pressed="${SEMC==="IM1"}">Integrated Math 1</button>
+      <button onclick="setSem('FA')" aria-pressed="${SEMC==="FA"}">Financial Algebra</button>
+    </div>`;
+  if(SEMC==="IM1")h+=`<div class="banner crit"><span class="ic">!</span><div>
+    <b>IM1 Semester 1 is about one week short.</b> The district's content adds up to 17 weeks; you have
+    roughly 16.5 usable. The squeeze lands on Linear vs. Exponential. Protect the must-do lessons and
+    cut the extensions — that's the district's own guidance.</div></div>`;
+  else h+=`<div class="banner warn"><span class="ic">✓</span><div>
+    <b>FA has two real buffer weeks (17 and 18).</b> Something will go wrong this semester.
+    That's where it absorbs. Don't fill them early.</div></div>`;
+  h+=`<div class="pace">`;
+  DATA.pacing[SEMC].forEach(p=>{
+    const cur=p.wk===paceWeek();
+    h+=`<div class="pw${cur?" cur":""}"><span class="w">WK ${p.wk}</span>
+      <span class="u">${esc(p.unit)}<span class="dd">${esc(p.dates)}</span>
+      ${p.note?`<span class="nt">${esc(p.note)}</span>`:""}</span></div>`});
+  h+=`</div>`;
+  $("#v-sem").innerHTML=h}
+function setSem(c){SEMC=c;renderSem()}
+
+/* ---------------- PREP ---------------- */
+function renderPrep(){
+  const done=JSON.parse(localStorage.getItem("prepDone")||"{}");
+  let h=`<div class="dayhead"><div><div class="d">Before next week</div>
+    <h2>Prep list</h2></div></div>`;
+  h+=`<div class="banner warn"><span class="ic">!</span><div>
+    <b>Print everything on Monday.</b> Reprographics exists — use it. This is the payoff of planning a
+    week ahead: hand a stack to the print shop instead of fighting the copier at 7:40am.</div></div>`;
+  h+=`<div class="prep">`;
+  DATA.prep.forEach((p,i)=>{
+    const d=parse(p.for);
+    h+=`<div class="pitem${p.critical?" crit":""}${done[i]?" done":""}" onclick="tick(${i})">
+      <span class="box">✓</span><span class="ptext">${lk(p.text)}
+      <span class="pfor">for ${DOW[d.getDay()].slice(0,3)} ${MON[d.getMonth()].slice(0,3)} ${d.getDate()}${p.critical?" · critical":""}</span>
+      </span></div>`});
+  h+=`</div>`;
+  h+=`<div class="qs"><h3 style="font-size:15px">Still unanswered</h3>
+    <p style="font-size:13.5px;margin:6px 0 0;color:var(--muted)">Things I couldn't find. Worth chasing.</p><ul>`;
+  DATA.openQuestions.forEach(q=>h+=`<li>${esc(q)}</li>`);
+  h+=`</ul></div>`;
+  $("#v-prep").innerHTML=h}
+function tick(i){const d=JSON.parse(localStorage.getItem("prepDone")||"{}");
+  d[i]=!d[i];localStorage.setItem("prepDone",JSON.stringify(d));renderPrep()}
+
+/* ---------------- NOTES ---------------- */
+function renderNotes(){
+  let h=`<div class="dayhead"><div><div class="d">Reflection log</div>
+    <h2>Notes</h2></div></div>`;
+  h+=`<div class="banner warn"><span class="ic">i</span><div>
+    <b>Source of truth is <code>Plans/NOTES.md</code>.</b> Paste your Bear notes there, then tell Claude
+    "sync my notes" — it copies whatever's new into this tab. This tab is a mirror, not where you type.</div></div>`;
+  if(!DATA.notes || !DATA.notes.length){
+    h+=`<div class="qs"><p style="font-size:13.5px;margin:0;color:var(--muted)">
+      No notes synced yet. Once you've pasted entries into NOTES.md and asked for a sync, they'll show up here,
+      newest first — and you can copy or download the whole log any time.</p></div>`;
+  } else {
+    h+=`<div style="display:flex;gap:8px;margin:12px 0"><button class="btn" onclick="copyNotes()">Copy all</button>
+      <button class="btn" onclick="downloadNotes()">Download .md</button></div>`;
+    h+=`<div class="qs">`;
+    DATA.notes.forEach(n=>{
+      h+=`<div style="margin-bottom:16px"><b>${esc(n.date)}${n.label?" — "+esc(n.label):""}</b>
+        <div style="white-space:pre-wrap;font-size:13.5px;margin-top:4px">${esc(n.text)}</div></div>`});
+    h+=`</div>`;
+  }
+  $("#v-notes").innerHTML=h}
+function notesText(){
+  return DATA.notes.map(n=>`### ${n.date}${n.label?" — "+n.label:""}\n\n${n.text}`).join("\n\n---\n\n")}
+function copyNotes(){cp(notesText(),"Notes copied")}
+function downloadNotes(){
+  const blob=new Blob([notesText()],{type:"text/markdown;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="mendez-notes.md";document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);document.body.removeChild(a)},1200);
+  toast("Notes downloaded")}
+
+/* ---------------- exports ---------------- */
+function lessonText(L,b,p){
+  let o=`PERIOD ${p} — ${L.course} — ${t12(b.start)} to ${t12(b.end)} (${b.min} min)\n${L.title}\n`;
+  if(L.unit)o+=`Unit: ${L.unit}\n`;
+  if(L.standard)o+=`Standard: ${L.standard}\n`;
+  o+=`\nGOAL\n${L.goal}\n\nFLOW\n`;
+  L.flow.forEach(f=>{o+=`  ${f.m} min — ${f.t}\n      ${f.d}\n`});
+  if(L.materials)o+=`\nMATERIALS\n  ${L.materials.join("\n  ")}\n`;
+  if(L.resources)o+=`\nRESOURCES\n  ${L.resources.join("\n  ")}\n`;
+  if(L.answers)o+=`\nANSWERS / TEACHER NOTES\n  ${L.answers}\n`;
+  if(L.watch)o+=`\nWATCH FOR\n  ${L.watch}\n`;
+  return o}
+function copyLesson(lid,p){
+  const rec=dayRec(CUR),b=DATA.bells[rec.type].find(x=>x.p===p);
+  cp(lessonText(DATA.lessons[lid],b,p),"Lesson copied")}
+function copyDay(){
+  const rec=dayRec(CUR),d=parse(CUR);
+  let o=`${DOW[d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  if(rec.type==="lateStart")o+=`  ** LATE START — 43-MINUTE PERIODS **`;
+  o+=`\n${"=".repeat(58)}\n\n`;
+  DATA.bells[rec.type].filter(b=>b.p!=="lunch"&&b.p<=4).forEach(b=>{
+    const lid=rec.lessons[b.p];if(!lid)return;
+    o+=lessonText(DATA.lessons[lid],b,b.p)+`\n${"-".repeat(58)}\n\n`});
+  cp(o,"Day copied")}
+function copyWeek(){
+  let o=`WEEK OF ${weekLabel(CUR).toUpperCase()} — Mr. Mendez\n${"=".repeat(58)}\n\n`;
+  weekDays(CUR).forEach(rec=>{
+    const d=parse(rec.date);
+    o+=`${DOW[d.getDay()].toUpperCase()} ${MON[d.getMonth()].slice(0,3)} ${d.getDate()}`;
+    if(rec.type==="lateStart")o+=`  ** LATE START, 43 MIN **`;
+    o+=`\n`;
+    [1,2].forEach(p=>{const lid=rec.lessons[p];if(!lid)return;
+      const L=DATA.lessons[lid];
+      o+=`   ${L.course.padEnd(4)} ${L.title}\n`});
+    o+=`\n`});
+  cp(o,"Week copied")}
+function cp(t,m){
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(t).then(()=>toast(m)).catch(()=>fb(t,m))}
+  else fb(t,m)}
+function fb(t,m){const a=document.createElement("textarea");a.value=t;
+  a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();
+  try{document.execCommand("copy");toast(m)}catch(e){toast("Couldn't copy — select manually")}
+  document.body.removeChild(a)}
+
+function printLesson(lid,p){
+  const rec=dayRec(CUR);
+  $$("#v-today .card").forEach(c=>{if(c.id!=="card-"+p)c.classList.add("printhide")});
+  const c=$("#card-"+p);if(c)c.classList.add("open");
+  setTimeout(()=>{window.print();
+    setTimeout(()=>$$("#v-today .card").forEach(x=>x.classList.remove("printhide")),400)},80)}
+
+function makeICS(){
+  const dt=(dstr,t)=>{const[y,m,d]=dstr.split("-");const[h,mi]=t.split(":");
+    return`${y}${m}${d}T${h}${mi}00`};
+  let L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Mendez//Teaching Dashboard//EN","CALSCALE:GREGORIAN"];
+  DATA.days.forEach(rec=>{
+    DATA.bells[rec.type].filter(b=>b.p!=="lunch"&&b.p<=4).forEach(b=>{
+      const lid=rec.lessons[b.p];if(!lid)return;const les=DATA.lessons[lid];
+      const desc=(les.goal+" || "+les.flow.map(f=>`${f.m}m ${f.t}`).join(" / ")).replace(/[,;\\]/g,"\\$&");
+      L.push("BEGIN:VEVENT",`UID:${rec.date}-p${b.p}@mendez`,`DTSTAMP:${dt(rec.date,b.start)}`,
+        `DTSTART:${dt(rec.date,b.start)}`,`DTEND:${dt(rec.date,b.end)}`,
+        `SUMMARY:P${b.p} ${les.course} — ${les.title.replace(/[,;\\]/g,"\\$&")}`,
+        `DESCRIPTION:${desc}`,"END:VEVENT")})});
+  DATA.keyDates.forEach(k=>{
+    const nd=k.date.replace(/-/g,"");
+    L.push("BEGIN:VEVENT",`UID:key-${nd}@mendez`,`DTSTAMP:${nd}T000000`,
+      `DTSTART;VALUE=DATE:${nd}`,`SUMMARY:${k.label.replace(/[,;\\]/g,"\\$&")}`,"END:VEVENT")});
+  L.push("END:VCALENDAR");
+  const blob=new Blob([L.join("\r\n")],{type:"text/calendar;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="mendez-teaching.ics";document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);document.body.removeChild(a)},1200);
+  toast("Calendar file downloaded")}
+
+/* ---------------- tabs + theme ---------------- */
+$$(".tab").forEach(t=>t.addEventListener("click",()=>{
+  $$(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
+  ["today","week","sem","prep","notes"].forEach(v=>$("#v-"+v).classList.toggle("hide",v!==t.dataset.v));
+  window.scrollTo(0,0)}));
+
+$("#themebtn").addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  const sysDark=window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const now=cur?cur:(sysDark?"dark":"light");
+  document.documentElement.setAttribute("data-theme",now==="dark"?"light":"dark")});
+
+renderToday();renderWeek();renderSem();renderPrep();renderNotes();
+$("#builtline").textContent=builtLine();
+tickNow();setInterval(tickNow,30000);
+</script>
